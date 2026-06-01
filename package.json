@@ -1,0 +1,11 @@
+{
+  "name": "trusttlayerr-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm run dev",
+    "docker:up": "docker-compose up -d",
+    "start": "npm run backend"
+  }
+}

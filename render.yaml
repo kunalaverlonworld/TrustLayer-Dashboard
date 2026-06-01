@@ -1,0 +1,47 @@
+services:
+  # ---------------------------------------------
+  # Backend Node/Express API Web Service
+  # ---------------------------------------------
+  - type: web
+    name: trustlayer-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false # Must be supplied by the user (MongoDB Atlas URI)
+      - key: JWT_SECRET
+        generateValue: true # Render will automatically generate a cryptographically secure JWT secret key
+      - key: FRONTEND_URL
+        sync: false # Must be supplied by the user once the frontend static URL is known
+      - key: RECRUITMENT_API_URL
+        value: http://127.0.0.1:8000
+      - key: SYSTEM_COMPANY_ID
+        value: default-company-id
+      - key: RESEND_API_KEY
+        sync: false
+
+  # ---------------------------------------------
+  # Frontend Vite React Static Site
+  # ---------------------------------------------
+  - type: web
+    name: trustlayer-frontend
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      # Rewrite rule for Client-Side SPA Routing (e.g. React Router)
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false # Must be supplied by the user (pointing to the deployed backend URL)

@@ -1,0 +1,155 @@
+import { apiClient } from "./Client";
+import {
+    TrustLayerDashboardItem,
+    TrustScoreResponse,
+    TrustExplainResponse,
+    InteractionResponse,
+    GhostedCandidateResponse,
+    HRFeedbackRequest,
+    HRFeedbackResponse,
+} from "../types/types";
+
+// -----------------------------
+// TrustLayer API Wrapper
+// -----------------------------
+export const API = {
+
+    // ---------------------------------
+    // Authentication
+    // ---------------------------------
+    login: (email: string, password: string) =>
+        apiClient.post<{
+            token: string;
+            user: {
+                id: string;
+                email: string;
+                role: string;
+                companyId: string;
+            };
+        }>("/api/auth/login", { email, password }),
+
+    getMe: () => apiClient.get("/api/users/me"),
+
+    // ---------------------------------
+    // Employees
+    // ---------------------------------
+    createEmployee: (body: {
+        name: string;
+        email: string;
+        department?: string;
+        designation?: string;
+        dateOfJoining: string;
+    }) =>
+        apiClient.post("/api/employees", body),
+
+    getAllEmployees: () =>
+        apiClient.get("/api/employees"),
+
+    getEmployeeById: (id: string) =>
+        apiClient.get(`/api/employees/${id}`),
+
+    getEmployeeByEmployeeId: (employeeId: string) =>
+        apiClient.get(`/api/employees/by-employee-id/${employeeId}`),
+
+    // ---------------------------------
+    // Update Employee
+    // ---------------------------------
+    updateEmployee: (
+        id: string,
+        body: {
+            name?: string;
+            email?: string;
+            department?: string;
+            designation?: string;
+            dateOfJoining?: string;
+        }
+    ) => apiClient.put(`/api/employees/${id}`, body),
+
+    // ---------------------------------
+    // Employee Profile
+    // ---------------------------------
+    getEmployeeProfile: (id: string) =>
+        apiClient.get(`/api/employees/by-employee-id/${id}`),
+
+    // ---------------------------------
+    // Incident Types
+    // ---------------------------------
+    getIncidentTypes: () =>
+        apiClient.get("/api/incident-types"),
+
+    // ---------------------------------
+    // Add Employee Incident
+    // ---------------------------------
+    addEmployeeIncident: (
+        employeeId: string,
+        body: {
+            incidentTypeId: string;
+            note?: string;
+        }
+    ) =>
+        apiClient.post(
+            `/api/employees/${employeeId}/incidents`,
+            body
+        ),
+
+    // ---------------------------------
+    // Dashboard
+    // ---------------------------------
+    getAllTrackedTrustScores: () =>
+        apiClient.get<TrustLayerDashboardItem[]>(
+            "/api/trustlayer/all"
+        ),
+
+    // ---------------------------------
+    // Interaction Metrics (ingestion)
+    // ---------------------------------
+    getInteraction: (applicationId: string) =>
+        apiClient.get<InteractionResponse>(
+            `/api/trustlayer/${applicationId}`
+        ),
+
+    // ---------------------------------
+    // Final Trust Score
+    // ---------------------------------
+    getTrustScore: (applicationId: string) =>
+        apiClient.get<TrustScoreResponse>(
+            `/api/trustscore/${applicationId}`
+        ),
+
+    // ---------------------------------
+    // Detailed Explanation
+    // ---------------------------------
+    getTrustExplain: (applicationId: string) =>
+        apiClient.get<TrustExplainResponse>(
+            `/api/trust-explain/${applicationId}`
+        ),
+
+    // ---------------------------------
+    // Ghosted Candidates
+    // ---------------------------------
+    getGhostedCandidates: (hours = 48) =>
+        apiClient.get<GhostedCandidateResponse[]>(
+            `/api/trustlayer/ghosted?hours=${hours}`
+        ),
+    // ---------------------------------
+    // HR Feedback - Fetch Single Application
+    // ---------------------------------
+    getHrFeedbackApplication: (applicationId: string) =>
+        apiClient.get<TrustLayerDashboardItem>(
+            `/api/hr-feedback/${applicationId}`
+        ),
+
+};
+
+export const submitHRFeedback = (
+    applicationId: string,
+    body: HRFeedbackRequest
+) =>
+    apiClient.post<HRFeedbackResponse>(
+        `/api/hr-feedback/${applicationId}`,
+        body
+    );
+
+export const sendHrEmail = (applicationId: string, body: { hrEmail: string; hrName?: string; candidateName: string }) => {
+    return apiClient.post(`/api/hr-feedback/send-email/${applicationId}`, body);
+};
