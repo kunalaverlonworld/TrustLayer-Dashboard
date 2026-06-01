@@ -30,7 +30,8 @@ async function seed() {
         // 3. Create Default Users
         const usersToSeed = [
             { email: "yaman.f@averlonworld.com", name: "Yaman F", role: "superadmin" },
-            { email: "admin@averlon.com", name: "Admin User", role: "superadmin" }
+            { email: "admin@averlon.com", name: "Admin User", role: "superadmin" },
+            { email: "user@averlon.com", name: "Normal User", role: "manager" }
         ];
 
         for (const u of usersToSeed) {
