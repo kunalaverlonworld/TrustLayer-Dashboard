@@ -19,6 +19,7 @@ import trustExplainRouter from "./routes/trustExplain";
 import incident from "./routes/incident";
 import { errorHandler } from "./middlewares/errorHandler";
 import lmsProxyRoutes from "./routes/lmsProxy";
+import razorpayRoutes from "./routes/razorpay";
 
 dotenv.config();
 
@@ -113,6 +114,7 @@ app.use("/api/trustscore", trustScoreRouter);
 app.use("/api/trust-explain", trustExplainRouter);
 app.use("/api/incident-types", incident);
 app.use("/api/lms", lmsProxyRoutes);
+app.use("/api/razorpay", razorpayRoutes);
 
 /* ---------- HEALTH CHECK ---------- */
 app.get("/", (_req: Request, res: Response) => {
