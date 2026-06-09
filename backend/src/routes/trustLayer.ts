@@ -53,8 +53,11 @@ router.get("/all", async (req: Request, res: Response) => {
         if (rawData.length === 0) {
             console.info("📊 Fetching from local TrustMetrics collection");
             if (connection.readyState !== 1) {
-                console.warn("⚠️ MongoDB is not connected. Returning empty list to prevent hanging.");
-                res.json([]);
+                console.error("❌ MongoDB not connected (readyState:", connection.readyState, ")");
+                res.status(503).json({
+                    error: "Database connection unavailable. Please try again shortly.",
+                    code: "DB_NOT_CONNECTED",
+                });
                 return;
             }
             const metrics = await TrustMetrics.find({}).limit(100);

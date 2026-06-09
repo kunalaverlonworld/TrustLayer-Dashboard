@@ -69,10 +69,15 @@ app.use(
 app.use(
     rateLimit({
         windowMs: 15 * 60 * 1000, // 15 mins
-        max: NODE_ENV === "production" ? 50 : 100,
+        // Dashboard polls every 30s, so 200 req/15min per IP is safe for production
+        max: NODE_ENV === "production" ? 200 : 500,
         standardHeaders: true,
         legacyHeaders: false,
         message: "Too many requests, please try again later.",
+        skip: (req) => {
+            // Skip rate limiting for health check
+            return req.path === "/" || req.path === "/health";
+        },
     })
 );
 

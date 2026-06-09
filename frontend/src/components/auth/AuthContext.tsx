@@ -38,11 +38,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 return;
             }
 
+            // Uses /api/auth/me — verifies JWT and returns user from DB
             const response = await API.getMe();
-            setUser(response.data.user);
-        } catch {
-            localStorage.removeItem("token");
-            setUser(null);
+
+            // Handle both { user: {...} } and { success: true, user: {...} } shapes
+            const userData = response.data?.user ?? response.data;
+
+            if (!userData || !userData._id) {
+                // Token valid but no user found — clear session
+                console.warn("[AuthContext] Token valid but user not found in response");
+                localStorage.removeItem("token");
+                setUser(null);
+            } else {
+                setUser(userData as User);
+            }
+        } catch (err: any) {
+            // Network error — don't logout, just set user null and let UI handle
+            if (err.isNetworkError) {
+                console.warn("[AuthContext] Network error fetching user — will retry on next action");
+                setUser(null);
+            } else {
+                // 401/403 — token invalid, clear session
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                localStorage.removeItem("plan");
+                localStorage.removeItem("licenseId");
+                setUser(null);
+            }
         } finally {
             setLoading(false);
         }
@@ -50,6 +72,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const logout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("plan");
+        localStorage.removeItem("licenseId");
         setUser(null);
         window.location.href = "/login";
     };

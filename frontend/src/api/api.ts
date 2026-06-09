@@ -9,6 +9,15 @@ import {
     HRFeedbackResponse,
 } from "../types/types";
 
+// Helper: extract array from backend response
+// Handles both: res.data = [...] and res.data = { data: [...] } or { results: [...] }
+function extractArray<T>(responseData: any): T[] {
+    if (Array.isArray(responseData)) return responseData as T[];
+    if (responseData && Array.isArray(responseData.data)) return responseData.data as T[];
+    if (responseData && Array.isArray(responseData.results)) return responseData.results as T[];
+    return [];
+}
+
 // -----------------------------
 // TrustLayer API Wrapper
 // -----------------------------
@@ -28,7 +37,9 @@ export const API = {
             };
         }>("/api/auth/login", { email, password }),
 
-    getMe: () => apiClient.get("/api/users/me"),
+    // Get current authenticated user
+    // Uses /api/auth/me which does NOT require a DB lookup — just verifies the JWT
+    getMe: () => apiClient.get("/api/auth/me"),
 
     // ---------------------------------
     // Employees
@@ -93,12 +104,14 @@ export const API = {
         ),
 
     // ---------------------------------
-    // Dashboard
+    // Dashboard — All Trust Scores
+    // Returns normalized array regardless of backend response shape
     // ---------------------------------
-    getAllTrackedTrustScores: () =>
-        apiClient.get<TrustLayerDashboardItem[]>(
-            "/api/trustlayer/all"
-        ),
+    getAllTrackedTrustScores: async (): Promise<{ data: TrustLayerDashboardItem[] }> => {
+        const res = await apiClient.get("/api/trustlayer/all");
+        const items = extractArray<TrustLayerDashboardItem>(res.data);
+        return { data: items };
+    },
 
     // ---------------------------------
     // Interaction Metrics (ingestion)
@@ -131,6 +144,7 @@ export const API = {
         apiClient.get<GhostedCandidateResponse[]>(
             `/api/trustlayer/ghosted?hours=${hours}`
         ),
+
     // ---------------------------------
     // HR Feedback - Fetch Single Application
     // ---------------------------------
@@ -138,7 +152,6 @@ export const API = {
         apiClient.get<TrustLayerDashboardItem>(
             `/api/hr-feedback/${applicationId}`
         ),
-
 };
 
 export const submitHRFeedback = (

@@ -79,9 +79,25 @@ const Dashboard: React.FC = () => {
             setData(res.data || []);
             setLastUpdated(new Date());
             setError(null);
-        } catch (err) {
-            console.error(err);
-            if (!silent) setError("Failed to load dashboard data. Please try again later.");
+        } catch (err: any) {
+            console.error("[Dashboard] fetchData error:", err);
+
+            if (!silent) {
+                // Extract meaningful error message from backend
+                const backendMsg = err?.response?.data?.error || err?.response?.data?.message;
+                const code = err?.response?.data?.code;
+
+                if (code === "DB_NOT_CONNECTED" || err?.response?.status === 503) {
+                    setError("Database is temporarily unavailable. Please try again in a moment.");
+                } else if (err?.response?.status === 401) {
+                    setError("Session expired. Please log in again.");
+                } else if (err?.isNetworkError) {
+                    setError("Cannot reach the server. Please check your connection.");
+                } else {
+                    setError(backendMsg || "Failed to load dashboard data. Please try again.");
+                }
+            }
+            // On silent refresh failure, keep existing data — don't reset
         } finally {
             setLoading(false);
             setIsRefreshing(false);
