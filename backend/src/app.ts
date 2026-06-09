@@ -18,6 +18,7 @@ import trustScoreRouter from "./routes/trustScore";
 import trustExplainRouter from "./routes/trustExplain";
 import incident from "./routes/incident";
 import { errorHandler } from "./middlewares/errorHandler";
+import lmsProxyRoutes from "./routes/lmsProxy";
 
 dotenv.config();
 
@@ -44,7 +45,9 @@ const whitelist = [
     process.env.FRONTEND_URL || "http://localhost:5173",
     "http://localhost:5173",
     "http://localhost:5174",
-    "http://localhost:5175"
+    "http://localhost:5175",
+    "https://trustlayer-by3p.onrender.com",
+    "https://trustlayer-frontend.onrender.com"
 ];
 app.use(
     cors({
@@ -55,6 +58,9 @@ app.use(
                 callback(new Error("Not allowed by CORS"));
             }
         },
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
+        credentials: true,
     })
 );
 
@@ -106,6 +112,7 @@ app.use("/api/hr-feedback", hrFeedbackRouter);
 app.use("/api/trustscore", trustScoreRouter);
 app.use("/api/trust-explain", trustExplainRouter);
 app.use("/api/incident-types", incident);
+app.use("/api/lms", lmsProxyRoutes);
 
 /* ---------- HEALTH CHECK ---------- */
 app.get("/", (_req: Request, res: Response) => {
