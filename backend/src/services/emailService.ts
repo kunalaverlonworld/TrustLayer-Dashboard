@@ -3,11 +3,14 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// RESEND_API_KEY is optional — server boots without it, email features will be disabled
 if (!process.env.RESEND_API_KEY) {
-  throw new Error("RESEND_API_KEY is not defined in environment variables");
+  console.warn("⚠️  RESEND_API_KEY is not set. Email features will be disabled.");
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 export const sendHrFeedbackEmail = async (
   hrEmail: string,
@@ -16,6 +19,10 @@ export const sendHrFeedbackEmail = async (
   applicationId: string
 ): Promise<void> => {
   try {
+    if (!resend) {
+      throw new Error("Email service is not configured. RESEND_API_KEY is missing.");
+    }
+
     if (!hrEmail) {
       throw new Error("HR email is missing");
     }
