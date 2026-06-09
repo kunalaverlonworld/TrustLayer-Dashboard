@@ -3,16 +3,26 @@ import { NavLink } from "react-router-dom";
 import { Home, BarChart3, LogOut, ClipboardCheck, LayoutDashboard } from "lucide-react";
 
 export default function Sidebar() {
+  const plan = localStorage.getItem("plan")?.toLowerCase() ?? "basic";
+
   const menu = [
     { icon: <LayoutDashboard size={20} />, path: "/dashboard", label: "Dashboard" },
-    // { icon: <Home size={20} />, path: "/dashboard/home", label: "Home" },
-    // { icon: <BarChart3 size={20} />, path: "/dashboard/analytics", label: "Analytics" },
-    { icon: <ClipboardCheck size={20} />, path: "/dashboard/hr-feedback", label: "HR Feedback" },
-    { icon: <ClipboardCheck size={20} />, path: "/dashboard/employees", label: "Employees" },
   ];
 
+  // HR Feedback is available to Starter and above
+  if (plan !== "basic" && plan !== "free") {
+    menu.push({ icon: <ClipboardCheck size={20} />, path: "/dashboard/hr-feedback", label: "HR Feedback" });
+  }
+
+  // Employees is available to Pro, Business, Enterprise
+  if (plan !== "basic" && plan !== "free" && plan !== "starter") {
+    menu.push({ icon: <ClipboardCheck size={20} />, path: "/dashboard/employees", label: "Employees" });
+  }
+
   const logout = () => {
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
+    localStorage.removeItem("plan");
+    localStorage.removeItem("licenseId");
     localStorage.removeItem("user");
     window.location.href = "/";
   };

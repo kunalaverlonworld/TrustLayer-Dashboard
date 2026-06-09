@@ -80,8 +80,11 @@ export default function Header() {
                             <span className="text-sm font-medium text-gray-800">
                                 {user?.name}
                             </span>
-                            <span className="text-xs text-gray-500 capitalize">
+                            <span className="text-xs text-gray-500 capitalize flex items-center gap-1 justify-end">
                                 {user?.role}
+                                <span className="bg-blue-100 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded text-[9px] uppercase font-extrabold tracking-wider">
+                                    {localStorage.getItem("plan") || "basic"}
+                                </span>
                             </span>
                         </div>
 
