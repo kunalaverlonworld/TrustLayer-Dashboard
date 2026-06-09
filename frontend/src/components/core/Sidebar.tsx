@@ -1,75 +1,171 @@
 // src/components/core/Sidebar.tsx
-import { NavLink } from "react-router-dom";
-import { Home, BarChart3, LogOut, ClipboardCheck, LayoutDashboard } from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+    LayoutDashboard,
+    ClipboardCheck,
+    Users,
+    LogOut,
+    ShieldCheck,
+    ChevronRight,
+} from "lucide-react";
 
 export default function Sidebar() {
-  const plan = localStorage.getItem("plan")?.toLowerCase() ?? "basic";
+    const plan = localStorage.getItem("plan")?.toLowerCase() ?? "basic";
+    const navigate = useNavigate();
 
-  const menu = [
-    { icon: <LayoutDashboard size={20} />, path: "/dashboard", label: "Dashboard" },
-  ];
+    const menu: { icon: React.ReactNode; path: string; label: string; badge?: string }[] = [
+        {
+            icon: <LayoutDashboard size={18} />,
+            path: "/dashboard",
+            label: "Dashboard",
+        },
+    ];
 
-  // HR Feedback is available to Starter and above
-  if (plan !== "basic" && plan !== "free") {
-    menu.push({ icon: <ClipboardCheck size={20} />, path: "/dashboard/hr-feedback", label: "HR Feedback" });
-  }
+    if (plan !== "basic" && plan !== "free") {
+        menu.push({
+            icon: <ClipboardCheck size={18} />,
+            path: "/dashboard/hr-feedback",
+            label: "HR Feedback",
+            badge: "New",
+        });
+    }
 
-  // Employees is available to Pro, Business, Enterprise
-  if (plan !== "basic" && plan !== "free" && plan !== "starter") {
-    menu.push({ icon: <ClipboardCheck size={20} />, path: "/dashboard/employees", label: "Employees" });
-  }
+    if (plan !== "basic" && plan !== "free" && plan !== "starter") {
+        menu.push({
+            icon: <Users size={18} />,
+            path: "/dashboard/employees",
+            label: "Employees",
+        });
+    }
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("plan");
-    localStorage.removeItem("licenseId");
-    localStorage.removeItem("user");
-    window.location.href = "/";
-  };
+    const logout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("plan");
+        localStorage.removeItem("licenseId");
+        localStorage.removeItem("user");
+        navigate("/");
+    };
 
-  return (
-    <aside
-      className="
-        fixed top-1/2 -translate-y-1/2 left-6
-        w-16 py-6 flex flex-col justify-between
-        rounded-3xl bg-[#ffffffef] backdrop-blur-md
-        border border-[#e2eaf3]
-        shadow-[0_10px_30px_rgba(10,31,61,0.06)]
-        z-50
-      "
-    >
-      {/* MENU */}
-      <div className="flex flex-col items-center space-y-6">
-        {menu.map((item, index) => (
-          <NavLink
-            key={index}
-            to={item.path}
-            title={item.label}
-            className={({ isActive }) =>
-              `group relative flex items-center justify-center p-3 rounded-2xl transition-all duration-250
-               hover:scale-110 hover:bg-[#e0f7fa]/30 hover:text-[#0097b2]
-               ${isActive ? "bg-[#e0f7fa]/50 text-[#0097b2] border border-[#00b8d4]/30" : "text-[#0a1f3d]/70"}`
-            }
-          >
-            {item.icon}
-            <span className="absolute left-full ml-3 whitespace-nowrap bg-[#0a1f3d] text-white text-xs font-bold px-2.5 py-1.5 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-50">
-              {item.label}
-            </span>
-          </NavLink>
-        ))}
-      </div>
+    const planLabel = (localStorage.getItem("plan") || "Basic").toUpperCase();
+    const planColor =
+        planLabel === "ENTERPRISE"
+            ? "from-amber-400 to-orange-500"
+            : planLabel === "PRO" || planLabel === "BUSINESS"
+            ? "from-[#00b8d4] to-[#1565c0]"
+            : "from-slate-400 to-slate-500";
 
-      {/* LOGOUT */}
-      <button
-        title="Logout"
-        onClick={logout}
-        className="group relative mx-auto p-3 rounded-2xl transition-all duration-250 hover:scale-110 hover:bg-rose-50 hover:text-rose-600 text-[#0a1f3d]/70"
-      >
-        <LogOut size={20} />
-        <span className="absolute left-full ml-3 whitespace-nowrap bg-[#0a1f3d] text-white text-xs font-bold px-2.5 py-1.5 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-50">
-          Logout
-        </span>
-      </button>
-    </aside>
-  );
+    return (
+        <aside
+            className="fixed top-0 left-0 h-full w-64 flex flex-col z-50"
+            style={{
+                background: "linear-gradient(180deg, #0a1f3d 0%, #0d2755 50%, #0a1f3d 100%)",
+                boxShadow: "4px 0 24px rgba(10,31,61,0.15)",
+            }}
+        >
+            {/* Logo */}
+            <div className="px-6 pt-7 pb-6 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                    <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{
+                            background: "linear-gradient(135deg, #00b8d4, #1565c0)",
+                            boxShadow: "0 4px 14px rgba(0,184,212,0.35)",
+                        }}
+                    >
+                        <ShieldCheck size={20} className="text-white" />
+                    </div>
+                    <div>
+                        <div className="text-white font-extrabold text-lg tracking-tight leading-none">
+                            Trust<span className="text-[#00b8d4]">Layer</span>
+                        </div>
+                        <div className="text-white/40 text-[10px] font-medium tracking-widest mt-0.5">
+                            AI ANALYTICS
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Plan badge */}
+            <div className="px-4 pt-4 pb-2">
+                <div
+                    className={`flex items-center gap-2 bg-gradient-to-r ${planColor} rounded-xl px-3 py-2.5`}
+                    style={{ boxShadow: "0 2px 10px rgba(0,184,212,0.2)" }}
+                >
+                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                    <span className="text-white text-[10px] font-black tracking-widest">
+                        {planLabel} PLAN
+                    </span>
+                </div>
+            </div>
+
+            {/* Navigation section label */}
+            <div className="px-6 pt-4 pb-2">
+                <span className="text-white/30 text-[9px] font-bold uppercase tracking-[0.15em]">
+                    Navigation
+                </span>
+            </div>
+
+            {/* Menu */}
+            <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+                {menu.map((item, index) => (
+                    <NavLink
+                        key={index}
+                        to={item.path}
+                        end={item.path === "/dashboard"}
+                        className={({ isActive }) =>
+                            `group flex items-center justify-between px-4 py-3 rounded-2xl font-medium text-sm transition-all duration-200 ${
+                                isActive
+                                    ? "bg-white/15 text-white shadow-sm"
+                                    : "text-white/55 hover:text-white hover:bg-white/8"
+                            }`
+                        }
+                    >
+                        {({ isActive }) => (
+                            <>
+                                <div className="flex items-center gap-3">
+                                    <span
+                                        className={`${
+                                            isActive
+                                                ? "text-[#00b8d4]"
+                                                : "text-white/40 group-hover:text-white/70"
+                                        } transition-colors`}
+                                    >
+                                        {item.icon}
+                                    </span>
+                                    <span>{item.label}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {item.badge && (
+                                        <span className="bg-[#00b8d4] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide">
+                                            {item.badge}
+                                        </span>
+                                    )}
+                                    {isActive && (
+                                        <ChevronRight
+                                            size={14}
+                                            className="text-[#00b8d4]"
+                                        />
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </NavLink>
+                ))}
+            </nav>
+
+            {/* Bottom: Logout */}
+            <div className="p-4 border-t border-white/10">
+                <button
+                    onClick={logout}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-white/50 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 text-sm font-medium group"
+                >
+                    <LogOut
+                        size={18}
+                        className="group-hover:text-rose-400 transition-colors"
+                    />
+                    <span>Sign Out</span>
+                </button>
+            </div>
+        </aside>
+    );
 }
