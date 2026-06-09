@@ -32,9 +32,9 @@ export default function Sidebar() {
       className="
         fixed top-1/2 -translate-y-1/2 left-6
         w-16 py-6 flex flex-col justify-between
-        rounded-2xl bg-[#ffffffef] backdrop-blur-md
-        border border-[#BFCFBB]/60
-        shadow-[0_6px_28px_rgba(18,46,52,0.18)]
+        rounded-3xl bg-[#ffffffef] backdrop-blur-md
+        border border-[#e2eaf3]
+        shadow-[0_10px_30px_rgba(10,31,61,0.06)]
         z-50
       "
     >
@@ -46,13 +46,13 @@ export default function Sidebar() {
             to={item.path}
             title={item.label}
             className={({ isActive }) =>
-              `group relative flex items-center justify-center p-3 rounded-2xl transition-all
-               hover:scale-110 hover:bg-[#F9FAF9]
-               ${isActive ? "bg-[#F9FAF9] border border-[#BFCFBB]" : ""}`
+              `group relative flex items-center justify-center p-3 rounded-2xl transition-all duration-250
+               hover:scale-110 hover:bg-[#e0f7fa]/30 hover:text-[#0097b2]
+               ${isActive ? "bg-[#e0f7fa]/50 text-[#0097b2] border border-[#00b8d4]/30" : "text-[#0a1f3d]/70"}`
             }
           >
             {item.icon}
-            <span className="absolute left-full ml-3 whitespace-nowrap bg-[#0D0D0D] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
+            <span className="absolute left-full ml-3 whitespace-nowrap bg-[#0a1f3d] text-white text-xs font-bold px-2.5 py-1.5 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-50">
               {item.label}
             </span>
           </NavLink>
@@ -63,10 +63,10 @@ export default function Sidebar() {
       <button
         title="Logout"
         onClick={logout}
-        className="group relative mx-auto p-3 rounded-2xl transition-all hover:scale-110 hover:bg-[#F9FAF9]"
+        className="group relative mx-auto p-3 rounded-2xl transition-all duration-250 hover:scale-110 hover:bg-rose-50 hover:text-rose-600 text-[#0a1f3d]/70"
       >
         <LogOut size={20} />
-        <span className="absolute left-full ml-3 whitespace-nowrap bg-[#0D0D0D] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
+        <span className="absolute left-full ml-3 whitespace-nowrap bg-[#0a1f3d] text-white text-xs font-bold px-2.5 py-1.5 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-50">
           Logout
         </span>
       </button>

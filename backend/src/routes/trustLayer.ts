@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import axios from "axios";
+import { connection } from "mongoose";
 import { TrustMetrics } from "../models/TrustMetrics";
 import { calculateInteractionMetrics } from "../utils/calculateInteractionMetrics";
 import { calculateFinalTrustScore } from "../utils/calculateTrustMetrics";
@@ -51,7 +52,13 @@ router.get("/all", async (req: Request, res: Response) => {
 
         if (rawData.length === 0) {
             console.info("📊 Fetching from local TrustMetrics collection");
+            if (connection.readyState !== 1) {
+                console.warn("⚠️ MongoDB is not connected. Returning empty list to prevent hanging.");
+                res.json([]);
+                return;
+            }
             const metrics = await TrustMetrics.find({}).limit(100);
+
 
             results = metrics.map((m: any) => {
                 const { finalTrustScore } = calculateFinalTrustScore(

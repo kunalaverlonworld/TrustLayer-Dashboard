@@ -3,13 +3,17 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI as string;
-
-if (!MONGO_URI) {
-    throw new Error("❌ MONGO_URI is not defined in environment variables");
-}
+const MONGO_URI = process.env.MONGO_URI as string | undefined;
 
 const connectDB = async (): Promise<void> => {
+    if (!MONGO_URI) {
+        if (process.env.NODE_ENV === "production") {
+            throw new Error("❌ MONGO_URI is not defined in environment variables");
+        }
+        console.warn("⚠️  MONGO_URI not set. Running in development mode without MongoDB.");
+        return;
+    }
+
     try {
         await mongoose.connect(MONGO_URI, {
             autoIndex: true,

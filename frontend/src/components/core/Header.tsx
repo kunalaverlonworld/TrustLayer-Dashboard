@@ -1,6 +1,6 @@
 // src/components/core/Header.tsx
 import React from "react";
-import { Bell, Search, LogOut } from "lucide-react";
+import { Bell, Search, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { useSearch } from "../../context/SearchContext";
 
@@ -39,16 +39,16 @@ export default function Header() {
     const avatarColor = getAvatarColor(user?.name);
 
     return (
-        <header className="w-full bg-white/0 backdrop-blur-md z-40 shadow-sm">
+        <header className="w-full bg-white/0 backdrop-blur-md z-40 border-b border-[#e2eaf3]/65">
             <div className="max-w-[1440px] mx-auto h-16 px-6 md:px-10 flex items-center justify-between ml-20">
 
                 {/* Logo */}
                 <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center font-semibold shadow-md">
-                        TL
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00b8d4] to-[#1565c0] text-white flex items-center justify-center shadow-[0_4px_14px_rgba(0,184,212,0.3)]">
+                        <ShieldCheck size={20} className="text-white" />
                     </div>
-                    <span className="text-lg font-semibold tracking-tight">
-                        TrustLayer
+                    <span className="text-lg font-extrabold tracking-tight text-[#0a1f3d]">
+                        Trust<span className="text-[#00b8d4]">Layer</span>
                     </span>
                 </div>
 
@@ -68,9 +68,9 @@ export default function Header() {
                 <div className="flex items-center space-x-6">
 
                     {/* Notifications */}
-                    <button className="relative text-gray-600 hover:text-black transition">
+                    <button className="relative text-[#0a1f3d]/70 hover:text-[#00b8d4] transition duration-200">
                         <Bell size={18} />
-                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-black rounded-full"></span>
+                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
                     </button>
 
                     {/* User Info + Logout */}
@@ -82,7 +82,7 @@ export default function Header() {
                             </span>
                             <span className="text-xs text-gray-500 capitalize flex items-center gap-1 justify-end">
                                 {user?.role}
-                                <span className="bg-blue-100 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded text-[9px] uppercase font-extrabold tracking-wider">
+                                <span className="bg-cyan-50 text-[#0097b2] border border-cyan-150 px-1.5 py-0.5 rounded text-[9px] uppercase font-extrabold tracking-wider">
                                     {localStorage.getItem("plan") || "basic"}
                                 </span>
                             </span>
