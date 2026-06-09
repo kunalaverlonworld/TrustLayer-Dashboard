@@ -174,13 +174,13 @@ const Dashboard: React.FC = () => {
             <div className="flex flex-col justify-center items-center h-[60vh] gap-5">
                 <div className="relative">
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                        style={{ background: "linear-gradient(135deg, rgba(0,184,212,0.1), rgba(21,101,192,0.1))" }}>
+                        style={{ background: "linear-gradient(135deg, rgba(0,184,212,0.15), rgba(21,101,192,0.15))" }}>
                         <ShieldCheck className="w-8 h-8 text-[#00b8d4]" />
                     </div>
-                    <div className="absolute -top-1 -right-1 w-5 h-5 border-2 border-[#e2eaf3] border-t-[#00b8d4] rounded-full animate-spin" />
+                    <div className="absolute -top-1 -right-1 w-5 h-5 border-2 border-slate-800 border-t-[#00b8d4] rounded-full animate-spin" />
                 </div>
                 <div className="text-center">
-                    <p className="font-bold text-[#0a1f3d] text-sm">Loading Trust Analytics</p>
+                    <p className="font-bold text-white text-sm">Loading Trust Analytics</p>
                     <p className="text-slate-400 text-xs mt-1">Fetching candidate data...</p>
                 </div>
             </div>
@@ -192,16 +192,16 @@ const Dashboard: React.FC = () => {
     if (error)
         return (
             <div className="flex flex-col justify-center items-center h-[60vh] gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-2xl bg-rose-950/40 border border-rose-900/50 flex items-center justify-center">
                     <ShieldAlert className="w-8 h-8 text-rose-500" />
                 </div>
                 <div className="text-center">
-                    <p className="font-bold text-[#0a1f3d]">Failed to Load Data</p>
-                    <p className="text-slate-400 text-sm mt-1">{error}</p>
+                    <p className="font-bold text-white">Failed to Load Data</p>
+                    <p className="text-rose-400 text-sm mt-1">{error}</p>
                 </div>
                 <button
                     onClick={() => fetchData()}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
                     style={{ background: "linear-gradient(135deg, #00b8d4, #1565c0)" }}
                 >
                     <RefreshCw className="w-4 h-4" />
@@ -220,9 +220,9 @@ const Dashboard: React.FC = () => {
                         <div
                             className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.12em]"
                             style={{
-                                background: "rgba(0,184,212,0.08)",
-                                border: "1px solid rgba(0,184,212,0.2)",
-                                color: "#0097b2",
+                                background: "rgba(0,184,212,0.15)",
+                                border: "1px solid rgba(0,184,212,0.3)",
+                                color: "#00b8d4",
                             }}
                         >
                             <Sparkles className="w-3 h-3" />
@@ -231,16 +231,16 @@ const Dashboard: React.FC = () => {
                         <div
                             className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.12em]"
                             style={{
-                                background: isRefreshing ? "rgba(245,158,11,0.08)" : "rgba(16,185,129,0.08)",
-                                border: `1px solid ${isRefreshing ? "rgba(245,158,11,0.2)" : "rgba(16,185,129,0.2)"}`,
-                                color: isRefreshing ? "#d97706" : "#059669",
+                                background: isRefreshing ? "rgba(245,158,11,0.15)" : "rgba(16,185,129,0.15)",
+                                border: `1px solid ${isRefreshing ? "rgba(245,158,11,0.3)" : "rgba(16,185,129,0.3)"}`,
+                                color: isRefreshing ? "#fbbf24" : "#4ade80",
                             }}
                         >
-                            <div className={`w-1.5 h-1.5 rounded-full ${isRefreshing ? "bg-amber-500" : "bg-emerald-500 animate-pulse"}`} />
+                            <div className={`w-1.5 h-1.5 rounded-full ${isRefreshing ? "bg-amber-400" : "bg-emerald-400 animate-pulse"}`} />
                             {isRefreshing ? "Syncing..." : "Live"}
                         </div>
                     </div>
-                    <h1 className="text-2xl font-black text-[#0a1f3d] tracking-tight">
+                    <h1 className="text-2xl font-black text-white tracking-tight">
                         Candidate Trust Analytics
                     </h1>
                     <p className="text-slate-400 text-sm mt-1 font-medium">
@@ -286,19 +286,19 @@ const Dashboard: React.FC = () => {
                                 filterRisk === opt
                                     ? {
                                         background: opt === "all"
-                                            ? "linear-gradient(135deg, #0a1f3d, #1565c0)"
+                                            ? "linear-gradient(135deg, #00b8d4, #1565c0)"
                                             : opt === "High"
                                             ? "linear-gradient(135deg, #ef4444, #b91c1c)"
                                             : opt === "Moderate"
                                             ? "linear-gradient(135deg, #f59e0b, #d97706)"
                                             : "linear-gradient(135deg, #10b981, #059669)",
                                         color: "#fff",
-                                        boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                                        boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                                     }
                                     : {
-                                        background: "rgba(255,255,255,0.7)",
-                                        border: "1px solid rgba(226,234,243,0.9)",
-                                        color: "#64748b",
+                                        background: "rgba(255,255,255,0.04)",
+                                        border: "1px solid rgba(255,255,255,0.08)",
+                                        color: "#94a3b8",
                                     }
                             }
                         >
@@ -312,7 +312,7 @@ const Dashboard: React.FC = () => {
                     ))}
                 </div>
                 <span className="text-xs text-slate-400 font-medium">
-                    Showing <span className="font-bold text-[#0a1f3d]">{sortedData.length}</span> results
+                    Showing <span className="font-bold text-[#00b8d4]">{sortedData.length}</span> results
                 </span>
             </div>
 
@@ -321,18 +321,18 @@ const Dashboard: React.FC = () => {
                 <div
                     className="rounded-2xl p-16 text-center"
                     style={{
-                        background: "rgba(255,255,255,0.8)",
-                        border: "1px solid rgba(226,234,243,0.9)",
+                        background: "rgba(10, 31, 61, 0.45)",
+                        border: "1px solid rgba(255,255,255,0.08)",
                         backdropFilter: "blur(10px)",
                     }}
                 >
                     <div
                         className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                        style={{ background: "rgba(0,184,212,0.08)" }}
+                        style={{ background: "rgba(0,184,212,0.15)" }}
                     >
                         <Users className="w-7 h-7 text-[#00b8d4]" />
                     </div>
-                    <h3 className="text-base font-bold text-[#0a1f3d] mb-2">No candidates found</h3>
+                    <h3 className="text-base font-bold text-white mb-2">No candidates found</h3>
                     <p className="text-slate-400 text-sm max-w-xs mx-auto">
                         {searchQuery ? `No results for "${searchQuery}". Try a different search.` : "No candidates match the selected filter."}
                     </p>
@@ -343,10 +343,10 @@ const Dashboard: React.FC = () => {
             <div
                 className="rounded-2xl overflow-hidden"
                 style={{
-                    background: "rgba(255,255,255,0.85)",
-                    border: "1px solid rgba(226,234,243,0.9)",
+                    background: "rgba(10, 31, 61, 0.45)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
                     backdropFilter: "blur(10px)",
-                    boxShadow: "0 4px 24px rgba(10,31,61,0.04)",
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
                 }}
             >
                 <div className="overflow-x-auto">
@@ -354,8 +354,8 @@ const Dashboard: React.FC = () => {
                         <thead>
                             <tr
                                 style={{
-                                    background: "linear-gradient(90deg, rgba(10,31,61,0.03), rgba(0,184,212,0.03))",
-                                    borderBottom: "1px solid rgba(226,234,243,0.8)",
+                                    background: "linear-gradient(90deg, rgba(255,255,255,0.02), rgba(0,184,212,0.02))",
+                                    borderBottom: "1px solid rgba(255,255,255,0.06)",
                                 }}
                             >
                                 {["Candidate", "Role & Pipeline", "Activity", "Trust Score", "Risk Level", "Actions"].map(col => (
@@ -380,11 +380,11 @@ const Dashboard: React.FC = () => {
                                         className="group transition-all duration-150"
                                         style={{
                                             borderBottom: idx < sortedData.length - 1
-                                                ? "1px solid rgba(226,234,243,0.6)"
+                                                ? "1px solid rgba(255,255,255,0.05)"
                                                 : "none",
                                         }}
                                         onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = "rgba(0,184,212,0.02)";
+                                            e.currentTarget.style.background = "rgba(0,184,212,0.04)";
                                         }}
                                         onMouseLeave={(e) => {
                                             e.currentTarget.style.background = "transparent";
@@ -395,7 +395,7 @@ const Dashboard: React.FC = () => {
                                             <div className="flex items-center gap-3">
                                                 <CandidateAvatar name={item.candidate?.name || "Unknown"} />
                                                 <div>
-                                                    <div className="font-bold text-[#0a1f3d] text-sm">
+                                                    <div className="font-bold text-white text-sm">
                                                         {item.candidate?.name || "Unknown"}
                                                     </div>
                                                     <div className="text-xs text-slate-400 font-medium mt-0.5">
@@ -407,20 +407,20 @@ const Dashboard: React.FC = () => {
 
                                         {/* Role & Pipeline */}
                                         <td className="px-5 py-4">
-                                            <div className="font-semibold text-[#0a1f3d] text-sm">
+                                            <div className="font-semibold text-white text-sm">
                                                 {item.candidate?.jobTitle || "—"}
                                             </div>
                                             <div className="flex items-center gap-1.5 mt-1">
                                                 <span className="text-xs text-slate-400 font-medium">
                                                     {item.candidate?.department || "—"}
                                                 </span>
-                                                <span className="text-slate-300">•</span>
+                                                <span className="text-slate-600">•</span>
                                                 <span
                                                     className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                                                     style={{
-                                                        background: "rgba(0,184,212,0.08)",
-                                                        color: "#0097b2",
-                                                        border: "1px solid rgba(0,184,212,0.15)",
+                                                        background: "rgba(0,184,212,0.15)",
+                                                        color: "#00b8d4",
+                                                        border: "1px solid rgba(0,184,212,0.25)",
                                                     }}
                                                 >
                                                     {item.candidate?.stage || "—"}
@@ -431,18 +431,18 @@ const Dashboard: React.FC = () => {
                                         {/* Activity */}
                                         <td className="px-5 py-4">
                                             <div className="flex items-center gap-4">
-                                                <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                                                    <Eye className="w-3.5 h-3.5 text-slate-400" />
-                                                    <span className="font-bold text-[#0a1f3d]">{item.totalOpens ?? 0}</span>
-                                                    <span className="text-slate-400">opens</span>
+                                                <div className="flex items-center gap-1.5 text-xs text-slate-300">
+                                                    <Eye className="w-3.5 h-3.5 text-slate-500" />
+                                                    <span className="font-bold text-white">{item.totalOpens ?? 0}</span>
+                                                    <span className="text-slate-500">opens</span>
                                                 </div>
-                                                <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                                                    <MousePointer className="w-3.5 h-3.5 text-slate-400" />
-                                                    <span className="font-bold text-[#0a1f3d]">{item.totalClicks ?? 0}</span>
-                                                    <span className="text-slate-400">clicks</span>
+                                                <div className="flex items-center gap-1.5 text-xs text-slate-300">
+                                                    <MousePointer className="w-3.5 h-3.5 text-slate-500" />
+                                                    <span className="font-bold text-white">{item.totalClicks ?? 0}</span>
+                                                    <span className="text-slate-500">clicks</span>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-400">
+                                            <div className="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500">
                                                 <Activity className="w-3 h-3" />
                                                 {item.totalInteractions ?? 0} total events
                                             </div>
@@ -458,7 +458,7 @@ const Dashboard: React.FC = () => {
                                                     {score.toFixed(1)}%
                                                 </span>
                                             </div>
-                                            <div className="w-24 h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
+                                            <div className="w-24 h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
                                                 <div
                                                     className="h-full rounded-full transition-all duration-500"
                                                     style={{
@@ -493,7 +493,8 @@ const Dashboard: React.FC = () => {
                                                 className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white rounded-xl transition-all duration-200 hover:-translate-y-0.5"
                                                 style={{
                                                     background: "linear-gradient(135deg, #0a1f3d, #1565c0)",
-                                                    boxShadow: "0 2px 8px rgba(10,31,61,0.2)",
+                                                    border: "1px solid rgba(0, 184, 212, 0.2)",
+                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                                                 }}
                                                 onMouseEnter={(e) => {
                                                     e.currentTarget.style.background = "linear-gradient(135deg,#00b8d4,#1565c0)";
@@ -501,7 +502,7 @@ const Dashboard: React.FC = () => {
                                                 }}
                                                 onMouseLeave={(e) => {
                                                     e.currentTarget.style.background = "linear-gradient(135deg, #0a1f3d, #1565c0)";
-                                                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(10,31,61,0.2)";
+                                                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
                                                 }}
                                             >
                                                 <BarChart3 className="w-3.5 h-3.5" />
@@ -519,14 +520,14 @@ const Dashboard: React.FC = () => {
                 <div
                     className="px-5 py-3 flex items-center justify-between"
                     style={{
-                        borderTop: "1px solid rgba(226,234,243,0.6)",
-                        background: "rgba(248,250,252,0.6)",
+                        borderTop: "1px solid rgba(255,255,255,0.06)",
+                        background: "rgba(255,255,255,0.01)",
                     }}
                 >
                     <span className="text-[10px] text-slate-400 font-medium">
                         {sortedData.length} candidate{sortedData.length !== 1 ? "s" : ""} • Auto-refreshes every 30s
                     </span>
-                    <div className="flex items-center gap-1.5 text-[10px] text-[#0097b2] font-bold">
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#00b8d4] font-bold">
                         <Zap className="w-3 h-3" />
                         AI Powered
                     </div>
@@ -539,7 +540,7 @@ const Dashboard: React.FC = () => {
             {selectedId && (
                 <div
                     className="fixed inset-0 flex items-center justify-center z-50 p-4"
-                    style={{ background: "rgba(10,31,61,0.6)", backdropFilter: "blur(8px)" }}
+                    style={{ background: "rgba(4, 11, 22, 0.8)", backdropFilter: "blur(8px)" }}
                     onClick={(e) => {
                         if (e.target === e.currentTarget) {
                             setSelectedId(null);
@@ -550,9 +551,9 @@ const Dashboard: React.FC = () => {
                     <div
                         className="w-full max-w-xl relative rounded-2xl overflow-hidden"
                         style={{
-                            background: "rgba(255,255,255,0.97)",
-                            border: "1px solid rgba(226,234,243,0.9)",
-                            boxShadow: "0 32px 80px rgba(10,31,61,0.25)",
+                            background: "linear-gradient(135deg, #091526 0%, #030811 100%)",
+                            border: "1px solid rgba(0, 184, 212, 0.25)",
+                            boxShadow: "0 24px 64px rgba(6, 13, 26, 0.6), inset 0 1px 1px rgba(255,255,255,0.1)",
                             backdropFilter: "blur(20px)",
                         }}
                     >
@@ -565,28 +566,28 @@ const Dashboard: React.FC = () => {
                         {/* Header */}
                         <div
                             className="flex items-center justify-between px-7 py-5"
-                            style={{ borderBottom: "1px solid rgba(226,234,243,0.6)" }}
+                            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
                         >
                             <div className="flex items-center gap-3">
                                 <div
                                     className="w-10 h-10 rounded-xl flex items-center justify-center"
-                                    style={{ background: "rgba(0,184,212,0.08)" }}
+                                    style={{ background: "rgba(0,184,212,0.15)", border: "1px solid rgba(0,184,212,0.2)" }}
                                 >
                                     <ClipboardList className="w-5 h-5 text-[#00b8d4]" />
                                 </div>
                                 <div>
-                                    <h2 className="text-base font-black text-[#0a1f3d]">Trust Score Breakdown</h2>
+                                    <h2 className="text-base font-black text-white">Trust Score Breakdown</h2>
                                     <p className="text-xs text-slate-400 font-medium mt-0.5">AI-generated analysis</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => { setSelectedId(null); setDetails(null); }}
                                 className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200"
-                                style={{ background: "rgba(241,245,249,0.8)", border: "1px solid rgba(226,234,243,0.9)" }}
-                                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(241,245,249,0.8)"; }}
+                                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.15)"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
                             >
-                                <X className="w-4 h-4 text-slate-500" />
+                                <X className="w-4 h-4 text-slate-400 hover:text-white" />
                             </button>
                         </div>
 
@@ -594,7 +595,7 @@ const Dashboard: React.FC = () => {
                         <div className="px-7 py-6 max-h-[70vh] overflow-y-auto space-y-5">
                             {detailsLoading ? (
                                 <div className="flex flex-col justify-center items-center py-12 gap-4">
-                                    <div className="w-10 h-10 border-2 border-[#e2eaf3] border-t-[#00b8d4] rounded-full animate-spin" />
+                                    <div className="w-10 h-10 border-2 border-slate-800 border-t-[#00b8d4] rounded-full animate-spin" />
                                     <p className="text-slate-400 text-sm font-medium">Analyzing trust signals...</p>
                                 </div>
                             ) : details ? (
@@ -603,12 +604,12 @@ const Dashboard: React.FC = () => {
                                     <div
                                         className="rounded-2xl p-5"
                                         style={{
-                                            background: "linear-gradient(135deg, rgba(0,184,212,0.05), rgba(21,101,192,0.05))",
-                                            border: "1px solid rgba(0,184,212,0.15)",
+                                            background: "linear-gradient(135deg, rgba(0,184,212,0.08), rgba(21,101,192,0.08))",
+                                            border: "1px solid rgba(0,184,212,0.2)",
                                         }}
                                     >
                                         <div className="flex items-center justify-between mb-3">
-                                            <span className="text-xs font-black uppercase tracking-[0.1em] text-slate-500">
+                                            <span className="text-xs font-black uppercase tracking-[0.1em] text-slate-400">
                                                 Overall Trustworthiness
                                             </span>
                                             <span
@@ -618,7 +619,7 @@ const Dashboard: React.FC = () => {
                                                 {details.finalTrustScore.toFixed(1)}%
                                             </span>
                                         </div>
-                                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                        <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
                                             <div
                                                 className="h-full rounded-full transition-all duration-700"
                                                 style={{
@@ -627,7 +628,7 @@ const Dashboard: React.FC = () => {
                                                 }}
                                             />
                                         </div>
-                                        <div className="flex justify-between text-[10px] text-slate-400 mt-2 font-medium">
+                                        <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-medium">
                                             <span>Low Trust</span>
                                             <span>High Trust</span>
                                         </div>
@@ -635,7 +636,7 @@ const Dashboard: React.FC = () => {
 
                                     {/* Components */}
                                     <div>
-                                        <h3 className="text-xs font-black uppercase tracking-[0.1em] text-[#0a1f3d] mb-3 flex items-center gap-2">
+                                        <h3 className="text-xs font-black uppercase tracking-[0.1em] text-slate-300 mb-3 flex items-center gap-2">
                                             <BarChart3 className="w-3.5 h-3.5 text-[#00b8d4]" />
                                             Evaluation Components
                                         </h3>
@@ -644,12 +645,12 @@ const Dashboard: React.FC = () => {
                                                 <div
                                                     className="rounded-xl p-4"
                                                     style={{
-                                                        background: "rgba(248,250,252,0.8)",
-                                                        border: "1px solid rgba(226,234,243,0.6)",
+                                                        background: "rgba(10, 31, 61, 0.4)",
+                                                        border: "1px solid rgba(255,255,255,0.06)",
                                                     }}
                                                 >
                                                     <div className="flex justify-between items-center mb-2">
-                                                        <span className="text-xs font-bold text-[#0a1f3d] flex items-center gap-1.5">
+                                                        <span className="text-xs font-bold text-white flex items-center gap-1.5">
                                                             <Activity className="w-3.5 h-3.5 text-[#00b8d4]" />
                                                             Candidate Interaction Rate
                                                         </span>
@@ -657,7 +658,7 @@ const Dashboard: React.FC = () => {
                                                             {(details.components.interaction.averageNormalizedScore ?? 0).toFixed(1)}%
                                                         </span>
                                                     </div>
-                                                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                    <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                                                         <div
                                                             className="h-full rounded-full"
                                                             style={{
@@ -672,12 +673,12 @@ const Dashboard: React.FC = () => {
                                             <div
                                                 className="rounded-xl p-4"
                                                 style={{
-                                                    background: "rgba(248,250,252,0.8)",
-                                                    border: "1px solid rgba(226,234,243,0.6)",
+                                                    background: "rgba(10, 31, 61, 0.4)",
+                                                    border: "1px solid rgba(255,255,255,0.06)",
                                                 }}
                                             >
                                                 <div className="flex justify-between items-center mb-2">
-                                                    <span className="text-xs font-bold text-[#0a1f3d] flex items-center gap-1.5">
+                                                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
                                                         <ClipboardList className="w-3.5 h-3.5 text-[#1565c0]" />
                                                         HR Reference Check Score
                                                     </span>
@@ -687,7 +688,7 @@ const Dashboard: React.FC = () => {
                                                             : "Pending"}
                                                     </span>
                                                 </div>
-                                                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                                                     <div
                                                         className="h-full rounded-full"
                                                         style={{
@@ -703,25 +704,25 @@ const Dashboard: React.FC = () => {
                                     {/* Metrics grid */}
                                     <div className="grid grid-cols-3 gap-3">
                                         {[
-                                            { label: "Total Opens", value: details.components?.interaction?.openCountTotal ?? 0, icon: <Eye className="w-4 h-4" />, color: "#0284c7" },
+                                            { label: "Total Opens", value: details.components?.interaction?.openCountTotal ?? 0, icon: <Eye className="w-4 h-4" />, color: "#00b8d4" },
                                             { label: "Total Clicks", value: details.components?.interaction?.clickCountTotal ?? 0, icon: <MousePointer className="w-4 h-4" />, color: "#1565c0" },
                                             {
                                                 label: "Ghosting",
                                                 value: details.components?.interaction?.ghostingDetected ? "Alert" : "Clean",
                                                 icon: <ShieldCheck className="w-4 h-4" />,
-                                                color: details.components?.interaction?.ghostingDetected ? "#dc2626" : "#10b981",
+                                                color: details.components?.interaction?.ghostingDetected ? "#ef4444" : "#10b981",
                                             },
                                         ].map(m => (
                                             <div
                                                 key={m.label}
                                                 className="rounded-xl p-4 text-center"
                                                 style={{
-                                                    background: "rgba(248,250,252,0.8)",
-                                                    border: "1px solid rgba(226,234,243,0.6)",
+                                                    background: "rgba(10, 31, 61, 0.4)",
+                                                    border: "1px solid rgba(255,255,255,0.06)",
                                                 }}
                                             >
                                                 <span style={{ color: m.color }} className="flex justify-center mb-2">{m.icon}</span>
-                                                <div className="text-base font-black text-[#0a1f3d]">{m.value}</div>
+                                                <div className="text-base font-black text-white">{m.value}</div>
                                                 <div className="text-[10px] text-slate-400 font-medium mt-0.5">{m.label}</div>
                                             </div>
                                         ))}
@@ -730,7 +731,7 @@ const Dashboard: React.FC = () => {
                                     {/* Key Insights */}
                                     {details.explanation && details.explanation.length > 0 && (
                                         <div>
-                                            <h3 className="text-xs font-black uppercase tracking-[0.1em] text-[#0a1f3d] mb-3 flex items-center gap-2">
+                                            <h3 className="text-xs font-black uppercase tracking-[0.1em] text-slate-300 mb-3 flex items-center gap-2">
                                                 <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
                                                 Key Insights & Signals
                                             </h3>
@@ -738,15 +739,15 @@ const Dashboard: React.FC = () => {
                                                 {details.explanation.map((line, index) => (
                                                     <li
                                                         key={index}
-                                                        className="flex items-start gap-3 text-xs text-[#475569] leading-relaxed p-3 rounded-xl"
+                                                        className="flex items-start gap-3 text-xs text-slate-300 leading-relaxed p-3 rounded-xl"
                                                         style={{
-                                                            background: "rgba(248,250,252,0.6)",
-                                                            border: "1px solid rgba(226,234,243,0.5)",
+                                                            background: "rgba(10, 31, 61, 0.3)",
+                                                            border: "1px solid rgba(255,255,255,0.05)",
                                                         }}
                                                     >
                                                         <div
                                                             className="w-4 h-4 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                                                            style={{ background: "rgba(0,184,212,0.1)" }}
+                                                            style={{ background: "rgba(0,184,212,0.15)" }}
                                                         >
                                                             <Check className="w-2.5 h-2.5 text-[#00b8d4]" />
                                                         </div>

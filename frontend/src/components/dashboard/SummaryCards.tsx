@@ -84,16 +84,18 @@ const SummaryCards: React.FC<Props> = ({ data }) => {
                     key={c.title}
                     className="group relative rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 cursor-default"
                     style={{
-                        background: "rgba(255,255,255,0.8)",
-                        border: `1px solid ${c.border}`,
+                        background: "rgba(10, 31, 61, 0.45)",
+                        border: `1px solid rgba(255, 255, 255, 0.08)`,
                         backdropFilter: "blur(10px)",
-                        boxShadow: `0 2px 12px rgba(10,31,61,0.04)`,
+                        boxShadow: `0 4px 24px rgba(0, 0, 0, 0.2)`,
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.boxShadow = `0 8px 28px ${c.glowColor}`;
+                        e.currentTarget.style.boxShadow = `0 8px 30px ${c.glowColor}`;
+                        e.currentTarget.style.borderColor = c.iconColor.includes("sky") ? "rgba(14,165,233,0.4)" : c.iconColor.includes("1565") ? "rgba(21,101,192,0.4)" : c.iconColor.includes("rose") ? "rgba(239,68,68,0.4)" : c.iconColor.includes("amber") ? "rgba(245,158,11,0.4)" : "rgba(16,185,129,0.4)";
                     }}
                     onMouseLeave={(e) => {
-                        e.currentTarget.style.boxShadow = `0 2px 12px rgba(10,31,61,0.04)`;
+                        e.currentTarget.style.boxShadow = `0 4px 24px rgba(0, 0, 0, 0.2)`;
+                        e.currentTarget.style.borderColor = `rgba(255, 255, 255, 0.08)`;
                     }}
                 >
                     {/* Top gradient accent bar */}
@@ -111,12 +113,12 @@ const SummaryCards: React.FC<Props> = ({ data }) => {
                     </div>
 
                     {/* Value */}
-                    <div className="text-[#0a1f3d] text-2xl font-black tracking-tight leading-none mb-1">
+                    <div className="text-white text-2xl font-black tracking-tight leading-none mb-1">
                         {c.value}
                     </div>
 
                     {/* Title */}
-                    <div className="text-[#0a1f3d] text-xs font-bold mb-0.5 tracking-tight">
+                    <div className="text-slate-200 text-xs font-bold mb-0.5 tracking-tight">
                         {c.title}
                     </div>
 

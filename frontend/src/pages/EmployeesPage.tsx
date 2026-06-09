@@ -149,96 +149,144 @@ const EmployeesPage: React.FC = () => {
 
     return (
         <div className="ml-5">
+            <style>{`
+                .tl-input {
+                    width: 100%;
+                    padding: 12px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    color: white;
+                    background: rgba(255, 255, 255, 0.02);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    outline: none;
+                    transition: all 0.2s;
+                }
+                .tl-input:focus {
+                    border-color: #00b8d4;
+                    background: rgba(255, 255, 255, 0.05);
+                    box-shadow: 0 0 0 3px rgba(0, 184, 212, 0.15);
+                }
+            `}</style>
+
             <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
             >
-                <h1 className="text-3xl font-semibold tracking-tight">
+                <h1 className="text-2xl font-black text-white tracking-tight">
                     Employees
                 </h1>
 
                 {companyName && (
-                    <p className="text-gray-500 mt-2">
+                    <p className="text-slate-400 mt-2 text-sm font-medium">
                         Company:{" "}
-                        <span className="font-medium text-gray-700">
+                        <span className="text-cyan-400 font-bold">
                             {companyName}
                         </span>
                     </p>
                 )}
 
-                <p className="text-gray-500 mt-1">
+                <p className="text-slate-400 mt-1 text-sm font-medium">
                     Manage and monitor all company employees.
                 </p>
             </motion.div>
 
             <div className="mt-8 flex justify-between items-center">
-                <div className="text-sm text-gray-500">
-                    Total Employees: {filteredEmployees.length}{searchQuery.trim() ? ` (filtered from ${employees.length})` : ''}
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wide">
+                    Total Employees: <span className="text-white font-black">{filteredEmployees.length}</span>{searchQuery.trim() ? ` (filtered from ${employees.length})` : ''}
                 </div>
 
                 <button
                     onClick={openCreateModal}
-                    className="bg-black text-white px-6 py-3 rounded-xl font-medium hover:opacity-90 transition shadow-sm"
+                    className="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider text-white transition-all duration-200 hover:-translate-y-0.5 shadow-sm"
+                    style={{
+                        background: "linear-gradient(135deg, #00b8d4, #1565c0)",
+                        boxShadow: "0 4px 14px rgba(0, 184, 212, 0.3)",
+                    }}
                 >
                     + Add Employee
                 </button>
             </div>
 
-            <div className="mt-6 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+            <div
+                className="mt-6 rounded-2xl overflow-hidden"
+                style={{
+                    background: "rgba(10, 31, 61, 0.45)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    backdropFilter: "blur(10px)",
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
+                }}
+            >
                 <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-600">
-                        <tr>
-                            <th className="px-6 py-4 text-left">Employee ID</th>
-                            <th className="px-6 py-4 text-left">Name</th>
-                            <th className="px-6 py-4 text-left">Email</th>
-                            <th className="px-6 py-4 text-left">Department</th>
-                            <th className="px-6 py-4 text-left">Actions</th>
+                    <thead>
+                        <tr
+                            style={{
+                                background: "linear-gradient(90deg, rgba(255,255,255,0.02), rgba(0,184,212,0.02))",
+                                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                            }}
+                        >
+                            <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.10em] text-slate-400">Employee ID</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.10em] text-slate-400">Name</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.10em] text-slate-400">Email</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.10em] text-slate-400">Department</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.10em] text-slate-400">Actions</th>
                         </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-white/5">
                         {loading ? (
                             [...Array(5)].map((_, i) => (
                                 <tr key={i} className="animate-pulse">
                                     <td className="px-6 py-4">
-                                        <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                        <div className="h-4 bg-white/5 rounded w-20"></div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="h-4 bg-gray-200 rounded w-32"></div>
+                                        <div className="h-4 bg-white/5 rounded w-32"></div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="h-4 bg-gray-200 rounded w-40"></div>
+                                        <div className="h-4 bg-white/5 rounded w-40"></div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                        <div className="h-4 bg-white/5 rounded w-24"></div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="h-8 bg-gray-200 rounded w-16"></div>
+                                        <div className="h-8 bg-white/5 rounded w-16"></div>
                                     </td>
                                 </tr>
                             ))
                         ) : error ? (
                             <tr>
-                                <td colSpan={5} className="px-6 py-6 text-center text-red-500">
+                                <td colSpan={5} className="px-6 py-6 text-center text-rose-400 font-semibold text-sm">
                                     {error}
                                 </td>
                             </tr>
                         ) : filteredEmployees.length === 0 ? (
                             <tr>
-                                <td colSpan={5} className="px-6 py-6 text-center text-gray-500">
+                                <td colSpan={5} className="px-6 py-8 text-center text-slate-400 font-medium text-sm">
                                     No employees yet
                                 </td>
                             </tr>
                         ) : (
                             filteredEmployees.map((employee) => (
-                                <tr key={employee._id} className="hover:bg-gray-50 transition">
-                                    <td className="px-6 py-4 font-medium">
+                                <tr
+                                    key={employee._id}
+                                    className="transition duration-150"
+                                    style={{
+                                        borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = "rgba(0,184,212,0.04)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = "transparent";
+                                    }}
+                                >
+                                    <td className="px-6 py-4 text-sm font-bold text-cyan-400 font-mono">
                                         {employee.employeeId}
                                     </td>
-                                    <td className="px-6 py-4">{employee.name}</td>
-                                    <td className="px-6 py-4">{employee.email}</td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 text-sm font-semibold text-white">{employee.name}</td>
+                                    <td className="px-6 py-4 text-sm text-slate-300 font-medium">{employee.email}</td>
+                                    <td className="px-6 py-4 text-sm text-slate-300 font-medium">
                                         {employee.department || "—"}
                                     </td>
                                     <td className="px-6 py-4 flex gap-2">
@@ -246,14 +294,21 @@ const EmployeesPage: React.FC = () => {
                                             onClick={() =>
                                                 navigate(`/employees/profile/${employee.employeeId}`)
                                             }
-                                            className="px-4 py-1.5 rounded-lg bg-gray-800 text-white text-xs font-medium shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                            className="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-200 transition-all hover:bg-white/10 hover:text-white"
+                                            style={{
+                                                background: "rgba(255,255,255,0.05)",
+                                                border: "1px solid rgba(255,255,255,0.08)",
+                                            }}
                                         >
                                             View
                                         </button>
 
                                         <button
                                             onClick={() => openEditModal(employee)}
-                                            className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-medium shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                            className="px-4 py-1.5 rounded-lg text-xs font-bold text-white transition-all hover:opacity-90 shadow-md"
+                                            style={{
+                                                background: "linear-gradient(135deg, #00b8d4, #1565c0)",
+                                            }}
                                         >
                                             Edit
                                         </button>
@@ -268,44 +323,61 @@ const EmployeesPage: React.FC = () => {
 
             {/* Modal remains same except button improved */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-xl">
-                        <h2 className="text-xl font-semibold mb-4">
+                <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-50">
+                    <div
+                        className="rounded-2xl p-8 w-full max-w-md"
+                        style={{
+                            background: "linear-gradient(135deg, #091526 0%, #030811 100%)",
+                            border: "1px solid rgba(0, 184, 212, 0.25)",
+                            boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+                        }}
+                    >
+                        <h2 className="text-xl font-black text-white mb-6 tracking-tight">
                             {editingEmployee ? "Edit Employee" : "Add Employee"}
                         </h2>
 
                         <div className="space-y-4">
-                            {/* inputs same as before */}
-                            <input type="text" placeholder="Name" className="w-full border p-3 rounded-lg"
+                            <input type="text" placeholder="Name" className="tl-input"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             />
-                            <input type="email" placeholder="Email" className="w-full border p-3 rounded-lg"
+                            <input type="email" placeholder="Email" className="tl-input"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             />
-                            <input type="text" placeholder="Department" className="w-full border p-3 rounded-lg"
+                            <input type="text" placeholder="Department" className="tl-input"
                                 value={formData.department}
                                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                             />
-                            <input type="text" placeholder="Designation" className="w-full border p-3 rounded-lg"
+                            <input type="text" placeholder="Designation" className="tl-input"
                                 value={formData.designation}
                                 onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
                             />
-                            <input type="date" className="w-full border p-3 rounded-lg"
+                            <input type="date" className="tl-input"
+                                style={{ colorScheme: "dark" }}
                                 value={formData.dateOfJoining}
                                 onChange={(e) => setFormData({ ...formData, dateOfJoining: e.target.value })}
                             />
                         </div>
 
                         <div className="flex justify-end gap-3 mt-6">
-                            <button onClick={closeModal} className="px-4 py-2 rounded-lg border">
+                            <button
+                                onClick={closeModal}
+                                className="px-4 py-2 rounded-lg text-sm font-bold text-slate-300 transition-all hover:bg-white/10 hover:text-white"
+                                style={{
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(255,255,255,0.08)",
+                                }}
+                            >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleSubmit}
                                 disabled={submitting}
-                                className="px-6 py-2 rounded-lg bg-black text-white flex items-center justify-center gap-2"
+                                className="px-6 py-2 rounded-lg text-sm font-black uppercase tracking-wider text-white flex items-center justify-center gap-2 transition hover:opacity-90 shadow-md"
+                                style={{
+                                    background: "linear-gradient(135deg, #00b8d4, #1565c0)",
+                                }}
                             >
                                 {submitting && (
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

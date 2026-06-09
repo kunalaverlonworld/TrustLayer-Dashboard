@@ -3,28 +3,127 @@ import { API, submitHRFeedback, sendHrEmail } from "../api/api";
 import { TrustLayerDashboardItem, HRFeedbackRequest } from "../types/types";
 import { useParams } from "react-router-dom";
 import { useSearch } from "../context/SearchContext";
+import {
+    Users, Mail, Star, CheckCircle2, X, Send,
+    Briefcase, MessageSquare, ShieldCheck,
+    ChevronRight, Clock, Building2, UserCheck,
+    AlertCircle, Loader2, Search, ClipboardList,
+} from "lucide-react";
 
+// ─── Design tokens (matches Dashboard) ──────────────────────────────────────
+const C = {
+    navy:      "#ffffff", // text-white matching headers/titles
+    navyMid:   "#94a3b8", // sub-headers/labels
+    teal:      "#00b8d4",
+    tealDark:  "#0097b2",
+    tealLight: "rgba(0,184,212,0.08)",
+    blue:      "#1565c0",
+    body:      "#cbd5e1", // body text/info values
+    muted:     "#64748b", // minor muted details
+    border:    "rgba(255, 255, 255, 0.08)", // subtle translucent borders
+    bg:        "transparent",
+    white:     "rgba(10, 31, 61, 0.45)", // card background
+};
 
+// ─── Score selector ──────────────────────────────────────────────────────────
 interface ScoreSelectorProps {
     label: string;
+    icon: React.ReactNode;
     value: number | null;
     onChange: (value: number) => void;
 }
 
-const ScoreSelector: React.FC<ScoreSelectorProps> = ({ label, value, onChange }) => (
-    <div className="space-y-1">
-        <h3 className="text-sm font-medium text-gray-700">{label}</h3>
-        <div className="flex gap-2">
+const SCORE_LABELS = ["", "Poor", "Below Avg", "Average", "Good", "Excellent"];
+const SCORE_COLORS = [
+    "", 
+    "#ef4444", // 1 - red
+    "#f97316", // 2 - orange
+    "#eab308", // 3 - yellow
+    "#22c55e", // 4 - green
+    "#00b8d4", // 5 - teal
+];
+
+const ScoreSelector: React.FC<ScoreSelectorProps> = ({ label, icon, value, onChange }) => (
+    <div
+        style={{
+            background: "rgba(255, 255, 255, 0.02)",
+            border: `1.5px solid ${C.border}`,
+            borderRadius: 14,
+            padding: "14px 16px",
+            transition: "border-color 0.2s, box-shadow 0.2s",
+            ...(value !== null ? {
+                borderColor: SCORE_COLORS[value] + "60",
+                boxShadow: `0 0 0 3px ${SCORE_COLORS[value]}18`,
+            } : {}),
+        }}
+    >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ color: C.teal, display: "flex", alignItems: "center" }}>{icon}</div>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "white", fontFamily: "'Inter', sans-serif" }}>
+                    {label}
+                </span>
+            </div>
+            {value !== null && (
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <span style={{
+                        fontSize: 11, fontWeight: 700, padding: "2px 10px",
+                        borderRadius: 100, background: SCORE_COLORS[value] + "18",
+                        color: SCORE_COLORS[value], fontFamily: "'Inter', sans-serif",
+                    }}>
+                        {SCORE_LABELS[value]}
+                    </span>
+                    <span style={{
+                        fontSize: 18, fontWeight: 800, color: SCORE_COLORS[value],
+                        fontFamily: "'Inter', sans-serif",
+                    }}>
+                        {value}/5
+                    </span>
+                </div>
+            )}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
             {[1, 2, 3, 4, 5].map((score) => (
                 <button
                     key={score}
                     type="button"
                     onClick={() => onChange(score)}
-                    className={`w-9 h-9 rounded-lg text-sm font-medium transition-all duration-200
-            ${value === score
-                            ? "bg-black text-white shadow-md scale-105"
-                            : "bg-white border border-gray-200 text-gray-600 hover:border-black hover:text-black"
-                        }`}
+                    style={{
+                        flex: 1,
+                        height: 40,
+                        borderRadius: 10,
+                        border: "1.5px solid",
+                        cursor: "pointer",
+                        fontSize: 14,
+                        fontWeight: 700,
+                        fontFamily: "'Inter', sans-serif",
+                        transition: "all 0.18s",
+                        ...(value === score ? {
+                            background: SCORE_COLORS[score],
+                            borderColor: SCORE_COLORS[score],
+                            color: "white",
+                            transform: "scale(1.05)",
+                            boxShadow: `0 4px 12px ${SCORE_COLORS[score]}40`,
+                        } : {
+                            background: "rgba(255, 255, 255, 0.04)",
+                            borderColor: C.border,
+                            color: C.muted,
+                        }),
+                    }}
+                    onMouseEnter={e => {
+                        if (value !== score) {
+                            (e.currentTarget as HTMLElement).style.borderColor = SCORE_COLORS[score];
+                            (e.currentTarget as HTMLElement).style.color = "white";
+                            (e.currentTarget as HTMLElement).style.background = SCORE_COLORS[score] + "18";
+                        }
+                    }}
+                    onMouseLeave={e => {
+                        if (value !== score) {
+                            (e.currentTarget as HTMLElement).style.borderColor = C.border;
+                            (e.currentTarget as HTMLElement).style.color = C.muted;
+                            (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.04)";
+                        }
+                    }}
                 >
                     {score}
                 </button>
@@ -33,31 +132,88 @@ const ScoreSelector: React.FC<ScoreSelectorProps> = ({ label, value, onChange })
     </div>
 );
 
+// ─── Toast ────────────────────────────────────────────────────────────────────
 const Toast: React.FC<{
     message: string;
     type?: "success" | "error";
     onClose: () => void;
 }> = ({ message, type = "success", onClose }) => (
-    <div className="fixed bottom-6 right-6 z-50 animate-slideUp">
-        <div
-            className={`px-6 py-4 rounded-2xl backdrop-blur-xl border shadow-2xl flex items-center gap-3 min-w-[280px]
-        ${type === "success"
-                    ? "bg-white/90 border-green-200 text-green-700"
-                    : "bg-white/90 border-red-200 text-red-600"
-                }`}
-        >
-            <div className={`w-3 h-3 rounded-full ${type === "success" ? "bg-green-500" : "bg-red-500"}`} />
-            <span className="font-medium">{message}</span>
-            <button
-                onClick={onClose}
-                className="ml-auto text-gray-400 hover:text-black transition"
-            >
-                ✕
+    <div style={{
+        position: "fixed", bottom: 28, right: 28, zIndex: 9999,
+        animation: "tl-toast-slide 0.35s cubic-bezier(0.22,1,0.36,1)",
+    }}>
+        <style>{`@keyframes tl-toast-slide { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }`}</style>
+        <div style={{
+            display: "flex", alignItems: "center", gap: 12,
+            background: "rgba(10, 31, 61, 0.95)", borderRadius: 16, padding: "14px 20px",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3)",
+            border: `1px solid ${type === "success" ? "#10b981" : "#ef4444"}`,
+            minWidth: 300, fontFamily: "'Inter', sans-serif",
+            backdropFilter: "blur(10px)",
+        }}>
+            <div style={{
+                width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: type === "success" ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)",
+            }}>
+                {type === "success"
+                    ? <CheckCircle2 size={16} color="#10b981" />
+                    : <AlertCircle size={16} color="#ef4444" />}
+            </div>
+            <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontSize: 13.5, fontWeight: 600, color: "white" }}>{message}</p>
+            </div>
+            <button onClick={onClose} style={{
+                background: "none", border: "none", cursor: "pointer",
+                color: C.muted, padding: 4, display: "flex", alignItems: "center",
+            }}>
+                <X size={15} />
             </button>
         </div>
     </div>
 );
 
+// ─── Risk badge ───────────────────────────────────────────────────────────────
+const RiskBadge: React.FC<{ level: "Low" | "Moderate" | "High" }> = ({ level }) => {
+    const cfg = {
+        Low:      { bg: "rgba(34,197,94,0.15)",   color: "#4ade80", dot: "#22c55e" },
+        Moderate: { bg: "rgba(234,179,8,0.15)",   color: "#fef08a", dot: "#eab308" },
+        High:     { bg: "rgba(239,68,68,0.15)",   color: "#fca5a5", dot: "#ef4444" },
+    }[level];
+    return (
+        <span style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            padding: "3px 10px", borderRadius: 100,
+            background: cfg.bg, color: cfg.color,
+            fontSize: 11, fontWeight: 700, fontFamily: "'Inter', sans-serif",
+            border: `1px solid ${cfg.dot}30`,
+        }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: cfg.dot }} />
+            {level} Risk
+        </span>
+    );
+};
+
+// ─── Avatar initials ─────────────────────────────────────────────────────────
+const Avatar: React.FC<{ name: string; size?: number }> = ({ name, size = 44 }) => {
+    const initials = name.split(" ").slice(0, 2).map(n => n[0]?.toUpperCase()).join("");
+    const colors = ["#00b8d4", "#1565c0", "#7c3aed", "#16a34a", "#f97316", "#e11d48"];
+    const colorIdx = name.charCodeAt(0) % colors.length;
+    return (
+        <div style={{
+            width: size, height: size, borderRadius: "50%", flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: `linear-gradient(135deg, ${colors[colorIdx]}, ${colors[(colorIdx + 1) % colors.length]})`,
+            fontSize: size * 0.35, fontWeight: 800, color: "white",
+            fontFamily: "'Inter', sans-serif",
+            boxShadow: `0 4px 12px rgba(0,0,0,0.3)`,
+        }}>
+            {initials || "?"}
+        </div>
+    );
+};
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 const HrFeedbackPage: React.FC = () => {
     const { applicationId } = useParams<{ applicationId?: string }>();
     const { searchQuery } = useSearch();
@@ -74,20 +230,29 @@ const HrFeedbackPage: React.FC = () => {
     const [rehireScore, setRehireScore] = useState<number | null>(null);
     const [offerOutcomeScore, setOfferOutcomeScore] = useState<number | null>(null);
     const [comments, setComments] = useState("");
+    const [submittedCount, setSubmittedCount] = useState(0);
 
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+    const showToast = (message: string, type: "success" | "error") => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 4000);
+    };
+
+    const allScoresFilled = [reliabilityScore, communicationScore, commitmentScore, rehireScore, offerOutcomeScore].every(v => v !== null);
+    const totalScore = allScoresFilled
+        ? Math.round(((reliabilityScore! + communicationScore! + commitmentScore! + rehireScore! + offerOutcomeScore!) / 25) * 100)
+        : null;
 
     // Fetch all candidates
     useEffect(() => {
         const fetchData = async () => {
             try {
                 if (applicationId) {
-                    // 🔥 Direct Link Mode
                     const res = await API.getHrFeedbackApplication(applicationId);
                     setSelectedCandidate(res.data);
                     setCandidates([]);
                 } else {
-                    // 🔥 Dashboard Mode
                     const res = await API.getAllTrackedTrustScores();
                     const filtered = (res.data || []).filter(
                         (c: TrustLayerDashboardItem) => !c.hrFeedbackSubmitted
@@ -96,12 +261,11 @@ const HrFeedbackPage: React.FC = () => {
                 }
             } catch (err) {
                 console.error(err);
-                setToast({ message: "Failed to fetch candidate(s).", type: "error" });
+                showToast("Failed to fetch candidates.", "error");
             } finally {
                 setLoadingCandidates(false);
             }
         };
-
         fetchData();
     }, [applicationId]);
 
@@ -116,19 +280,12 @@ const HrFeedbackPage: React.FC = () => {
         );
     }, [candidates, searchQuery]);
 
-
-    // Submit HR Feedback
     const handleSubmit = async () => {
-        if (
-            !selectedCandidate ||
-            [reliabilityScore, communicationScore, commitmentScore, rehireScore, offerOutcomeScore].some(v => v === null)
-        ) {
-            setToast({ message: "Please fill all scores before submitting.", type: "error" });
+        if (!selectedCandidate || !allScoresFilled) {
+            showToast("Please fill all scores before submitting.", "error");
             return;
         }
-
         setLoadingSubmit(true);
-
         const payload: HRFeedbackRequest = {
             reliabilityScore: reliabilityScore!,
             communicationScore: communicationScore!,
@@ -137,185 +294,501 @@ const HrFeedbackPage: React.FC = () => {
             offerOutcomeScore: offerOutcomeScore!,
             comments,
         };
-
         try {
             const res = await submitHRFeedback(selectedCandidate.applicationId, payload);
-
-            // Remove candidate from list
             setCandidates(prev => prev.filter(c => c.applicationId !== selectedCandidate.applicationId));
             setSelectedCandidate(null);
-
-            // Reset scores
             setReliabilityScore(null);
             setCommunicationScore(null);
             setCommitmentScore(null);
             setRehireScore(null);
             setOfferOutcomeScore(null);
             setComments("");
-
-            setToast({ message: `HR Score submitted: ${res.data.hrScore}%`, type: "success" });
+            setSubmittedCount(n => n + 1);
+            showToast(`✅ Feedback submitted — HR Score: ${res.data.hrScore}%`, "success");
         } catch (err: any) {
-            setToast({ message: err?.response?.data?.error || "Failed to submit HR feedback.", type: "error" });
+            showToast(err?.response?.data?.error || "Failed to submit HR feedback.", "error");
         } finally {
             setLoadingSubmit(false);
-            setTimeout(() => setToast(null), 4000);
         }
     };
 
-    // Trigger HR Email
     const handleSendEmail = async (c: TrustLayerDashboardItem) => {
         setLoadingEmail(c.applicationId);
-        
-        // 🚀 Extract previous HR context (defaulting to first employer found)
         const prevEmployer = c.candidate.previousEmployments?.[0];
         const hrEmail = prevEmployer?.hrEmail || "No HR Email Found";
         const hrName = prevEmployer?.hrName || "HR Manager";
-
         try {
-            await sendHrEmail(c.applicationId, {
-                hrEmail,
-                hrName,
-                candidateName: c.candidate.name,
-            });
-            setToast({ message: "HR email sent successfully ✅", type: "success" });
+            await sendHrEmail(c.applicationId, { hrEmail, hrName, candidateName: c.candidate.name });
+            showToast("HR email sent successfully!", "success");
         } catch (err: any) {
-            console.error("Send HR email failed:", err);
-            setToast({ message: err?.response?.data?.error || "Failed; see console log.", type: "error" });
+            showToast(err?.response?.data?.error || "Failed to send email.", "error");
         } finally {
             setLoadingEmail(null);
-            setTimeout(() => setToast(null), 4000);
         }
     };
 
-    if (loadingCandidates) return <div className="text-center py-20 text-gray-500">Loading candidates...</div>;
+    // ─── Loading ────────────────────────────────────────────────────────────
+    if (loadingCandidates) return (
+        <div style={{
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            minHeight: 400, gap: 16, fontFamily: "'Inter', sans-serif",
+        }}>
+            <div style={{
+                width: 56, height: 56, borderRadius: 16,
+                background: C.tealLight, display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+                <Loader2 size={26} color={C.teal} style={{ animation: "spin 1s linear infinite" }} />
+            </div>
+            <style>{`@keyframes spin { to { transform:rotate(360deg); } }`}</style>
+            <p style={{ color: C.muted, fontSize: 14, fontWeight: 500, margin: 0 }}>Loading candidates…</p>
+        </div>
+    );
 
     return (
-        <div className="max-w-5xl mx-auto px-4">
-            <h1 className="text-3xl font-bold mb-6">HR Feedback</h1>
+        <div style={{ fontFamily: "'Inter', sans-serif", padding: "4px 0", maxWidth: 1100, margin: "0 auto" }}>
+            <style>{`
+                @keyframes tl-slide-up { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+                @keyframes tl-modal-in { from { opacity:0; transform:scale(0.95) translateY(16px); } to { opacity:1; transform:scale(1) translateY(0); } }
+                @keyframes tl-spin { to { transform: rotate(360deg); } }
+                .tl-card-row:hover { background: rgba(0, 184, 212, 0.08) !important; box-shadow: 0 0 20px rgba(0, 184, 212, 0.15) !important; transform: translateY(-1px); border-color: rgba(0, 184, 212, 0.3) !important; }
+                .tl-email-btn:hover:not(:disabled) { background: linear-gradient(135deg,${C.teal},${C.tealDark}) !important; color: white !important; border-color: transparent !important; }
+                .tl-feedback-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,184,212,0.3) !important; }
+            `}</style>
 
-            {filteredCandidates.length === 0 && (
-                <div className="text-center text-gray-500 py-16">All feedback submitted ✔</div>
-            )}
-
-            <div className="grid gap-3">
-                {filteredCandidates.map((c) => (
-                    <div
-                        key={c.applicationId}
-                        className="flex justify-between items-center p-4 rounded-2xl bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-md transition"
-                    >
+            {/* ── Page header ── */}
+            <div style={{
+                display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+                marginBottom: 28, flexWrap: "wrap", gap: 16,
+            }}>
+                <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                        <div style={{
+                            width: 38, height: 38, borderRadius: 11,
+                            background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            boxShadow: "0 4px 12px rgba(0,184,212,0.30)",
+                        }}>
+                            <ClipboardList size={19} color="white" />
+                        </div>
                         <div>
-                            <div className="font-semibold text-gray-900">{c.candidate.name}</div>
-                            <div className="text-gray-500 text-sm">{c.candidate.email}</div>
-                            <div className="text-gray-400 text-xs mt-1">
-                                {c.candidate.jobTitle} • {c.candidate.department} • {c.candidate.stage}
+                            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: "white", letterSpacing: "-0.02em" }}>
+                                HR Feedback
+                            </h1>
+                            <p style={{ margin: 0, fontSize: 12.5, color: C.muted, marginTop: 1 }}>
+                                Review candidates and submit evaluations
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Stats pills */}
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <div style={{
+                        display: "flex", alignItems: "center", gap: 8,
+                        background: C.white, border: `1px solid ${C.border}`,
+                        borderRadius: 12, padding: "8px 16px",
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                        backdropFilter: "blur(10px)",
+                    }}>
+                        <div style={{
+                            width: 28, height: 28, borderRadius: 8,
+                            background: "rgba(0,184,212,0.15)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                            <Users size={14} color={C.teal} />
+                        </div>
+                        <div>
+                            <p style={{ margin: 0, fontSize: 10, color: C.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Pending</p>
+                            <p style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "white", lineHeight: 1 }}>{filteredCandidates.length}</p>
+                        </div>
+                    </div>
+                    {submittedCount > 0 && (
+                        <div style={{
+                            display: "flex", alignItems: "center", gap: 8,
+                            background: "rgba(22,163,74,0.1)", border: "1px solid rgba(22,163,74,0.3)",
+                            borderRadius: 12, padding: "8px 16px",
+                            backdropFilter: "blur(10px)",
+                        }}>
+                            <div style={{
+                                width: 28, height: 28, borderRadius: 8,
+                                background: "rgba(22,163,74,0.15)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                            }}>
+                                <CheckCircle2 size={14} color="#4ade80" />
+                            </div>
+                            <div>
+                                <p style={{ margin: 0, fontSize: 10, color: "#4ade80", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Submitted</p>
+                                <p style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#4ade80", lineHeight: 1 }}>{submittedCount}</p>
                             </div>
                         </div>
-
-                        <button
-                            onClick={() => handleSendEmail(c)}
-                            disabled={loadingEmail === c.applicationId}
-                            className={`px-4 py-1.5 rounded-xl border border-black font-medium transition
-                ${loadingEmail === c.applicationId ? "bg-gray-300 text-gray-600" : "bg-white text-black hover:bg-black hover:text-white"}`}
-                        >
-                            {loadingEmail === c.applicationId ? "Sending..." : "Send HR Email"}
-                        </button>
-
-                        <button
-                            onClick={() => setSelectedCandidate(c)}
-                            className="px-4 py-1.5 rounded-xl bg-black text-white font-medium hover:scale-[1.03] transition"
-                        >
-                            Submit Feedback
-                        </button>
-                    </div>
-                ))}
+                    )}
+                </div>
             </div>
 
-            {selectedCandidate && (
-                <div 
-                    className="fixed inset-0 flex items-center justify-center z-40 bg-black/20 backdrop-blur-sm"
-                    onClick={() => setSelectedCandidate(null)}
-                >
-                    <div 
-                        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative max-h-[80vh] overflow-y-auto"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <button
-                            onClick={() => setSelectedCandidate(null)}
-                            className="absolute top-3 right-3 text-gray-500 hover:text-black text-lg"
-                        >
-                            ✕
-                        </button>
+            {/* ── Empty state ── */}
+            {filteredCandidates.length === 0 && (
+                <div style={{
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                    padding: "72px 24px", background: C.white, borderRadius: 20,
+                    border: `1px solid ${C.border}`,
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
+                    backdropFilter: "blur(10px)",
+                    animation: "tl-slide-up 0.4s ease",
+                }}>
+                    <div style={{
+                        width: 72, height: 72, borderRadius: "50%", marginBottom: 20,
+                        background: "linear-gradient(135deg, rgba(0,184,212,0.15), rgba(0,184,212,0.05))",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        boxShadow: "0 0 0 16px rgba(0,184,212,0.04)",
+                    }}>
+                        <CheckCircle2 size={32} color={C.teal} />
+                    </div>
+                    <h3 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 800, color: "white" }}>
+                        All Caught Up!
+                    </h3>
+                    <p style={{ margin: 0, fontSize: 14, color: C.muted, textAlign: "center", maxWidth: 320 }}>
+                        {searchQuery
+                            ? `No candidates match "${searchQuery}"`
+                            : "All HR feedback has been submitted. Great work!"}
+                    </p>
+                </div>
+            )}
 
-                        <h2 className="text-xl font-bold mb-2">
-                            Feedback for {selectedCandidate.candidate.name}
-                        </h2>
+            {/* ── Candidate cards ── */}
+            {filteredCandidates.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {filteredCandidates.map((c, i) => {
+                        const isEmailLoading = loadingEmail === c.applicationId;
+                        return (
+                            <div
+                                key={c.applicationId}
+                                className="tl-card-row"
+                                style={{
+                                    display: "flex", alignItems: "center", gap: 16,
+                                    padding: "16px 20px",
+                                    background: C.white,
+                                    borderRadius: 18,
+                                    border: `1px solid ${C.border}`,
+                                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                                    backdropFilter: "blur(10px)",
+                                    transition: "all 0.2s ease",
+                                    animation: `tl-slide-up 0.35s ease ${i * 0.04}s both`,
+                                    cursor: "default",
+                                }}
+                            >
+                                {/* Avatar */}
+                                <Avatar name={c.candidate.name} size={48} />
 
-                        <div className="mb-4 p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3">
-                            <div className="flex flex-wrap items-center gap-2 text-sm">
-                                <span className="px-3 py-1 rounded-full bg-black text-white text-xs font-medium">
-                                    {selectedCandidate.candidate.yearsOfExperience ?? 0} yrs experience
-                                </span>
-                                <span className="text-gray-600">{selectedCandidate.candidate.jobTitle}</span>
-                                <span className="text-gray-400">•</span>
-                                <span className="text-gray-600">{selectedCandidate.candidate.department}</span>
-                            </div>
-
-                            {(selectedCandidate.candidate.previousEmployments ?? []).length > 0 && (
-                                <div className="space-y-2">
-                                    {(selectedCandidate.candidate.previousEmployments ?? []).map((job, idx) => (
-                                        <div key={idx} className="p-3 rounded-lg bg-white border border-gray-200 shadow-sm">
-                                            <div className="font-semibold text-gray-800">{job.companyName}</div>
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                {job.employmentStartDate} – {job.employmentEndDate ?? "Present"}
-                                            </div>
-                                            {job.consentToContact ? (
-                                                <div className="mt-2 text-xs text-gray-600">
-                                                    <div>HR: {job.hrName}</div>
-                                                    <div>Email: {job.hrEmail}</div>
-                                                </div>
-                                            ) : (
-                                                <div className="mt-2 text-xs text-red-500">HR Contact Not Permitted</div>
-                                            )}
-                                        </div>
-                                    ))}
+                                {/* Info */}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 3 }}>
+                                        <span style={{ fontSize: 15, fontWeight: 700, color: "white" }}>
+                                            {c.candidate.name}
+                                        </span>
+                                        <RiskBadge level={(c.riskLevel as any) || "Low"} />
+                                    </div>
+                                    <div style={{ fontSize: 12.5, color: C.body, marginBottom: 4 }}>
+                                        {c.candidate.email}
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                                        {c.candidate.jobTitle && c.candidate.jobTitle !== "N/A" && (
+                                            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11.5, color: C.muted }}>
+                                                <Briefcase size={11} />
+                                                {c.candidate.jobTitle}
+                                            </span>
+                                        )}
+                                        {c.candidate.department && c.candidate.department !== "N/A" && (
+                                            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11.5, color: C.muted }}>
+                                                <Building2 size={11} />
+                                                {c.candidate.department}
+                                            </span>
+                                        )}
+                                        <span style={{
+                                            display: "flex", alignItems: "center", gap: 4,
+                                            fontSize: 11.5, fontWeight: 700, color: C.teal,
+                                        }}>
+                                            <Star size={11} fill={C.teal} />
+                                            Trust: {c.finalTrustScore}%
+                                        </span>
+                                    </div>
                                 </div>
-                            )}
+
+                                {/* Actions */}
+                                <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+                                    <button
+                                        className="tl-email-btn"
+                                        onClick={() => handleSendEmail(c)}
+                                        disabled={isEmailLoading}
+                                        style={{
+                                            display: "flex", alignItems: "center", gap: 7,
+                                            padding: "9px 16px", borderRadius: 12,
+                                            border: `1px solid ${C.border}`,
+                                            background: "rgba(255, 255, 255, 0.04)", color: C.body,
+                                            fontSize: 13, fontWeight: 600, cursor: "pointer",
+                                            transition: "all 0.2s",
+                                            fontFamily: "'Inter', sans-serif",
+                                            opacity: isEmailLoading ? 0.65 : 1,
+                                            whiteSpace: "nowrap",
+                                        }}
+                                    >
+                                        {isEmailLoading
+                                            ? <Loader2 size={13} style={{ animation: "tl-spin 0.8s linear infinite" }} />
+                                            : <Send size={13} />}
+                                        {isEmailLoading ? "Sending…" : "Send Email"}
+                                    </button>
+
+                                    <button
+                                        className="tl-feedback-btn"
+                                        onClick={() => setSelectedCandidate(c)}
+                                        style={{
+                                            display: "flex", alignItems: "center", gap: 7,
+                                            padding: "9px 18px", borderRadius: 12,
+                                            border: "none",
+                                            background: "linear-gradient(135deg, #00b8d4, #1565c0)",
+                                            color: "white",
+                                            fontSize: 13, fontWeight: 700, cursor: "pointer",
+                                            transition: "all 0.2s",
+                                            fontFamily: "'Inter', sans-serif",
+                                            boxShadow: "0 4px 12px rgba(0,184,212,0.25)",
+                                            whiteSpace: "nowrap",
+                                        }}
+                                    >
+                                        <MessageSquare size={13} />
+                                        Submit Feedback
+                                        <ChevronRight size={13} />
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* ── Feedback Modal ── */}
+            {selectedCandidate && (
+                <div
+                    onClick={() => setSelectedCandidate(null)}
+                    style={{
+                        position: "fixed", inset: 0, zIndex: 50,
+                        background: "rgba(3, 8, 17, 0.75)", backdropFilter: "blur(12px)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        padding: 16,
+                    }}
+                >
+                    <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                            background: "linear-gradient(135deg, #091526 0%, #030811 100%)", borderRadius: 24,
+                            width: "100%", maxWidth: 580,
+                            maxHeight: "90vh", overflowY: "auto",
+                            boxShadow: "0 32px 80px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.3)",
+                            border: "1px solid rgba(0, 184, 212, 0.25)",
+                            animation: "tl-modal-in 0.35s cubic-bezier(0.22,1,0.36,1)",
+                            scrollbarWidth: "thin",
+                            scrollbarColor: "rgba(255,255,255,0.1) transparent",
+                        }}
+                    >
+                        {/* Modal header */}
+                        <div style={{
+                            padding: "22px 24px 18px",
+                            borderBottom: `1px solid ${C.border}`,
+                            display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
+                            position: "sticky", top: 0, background: "rgba(9, 21, 38, 0.95)", zIndex: 5, borderRadius: "24px 24px 0 0",
+                            backdropFilter: "blur(10px)",
+                        }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                                <Avatar name={selectedCandidate.candidate.name} size={52} />
+                                <div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "white", letterSpacing: "-0.01em" }}>
+                                            {selectedCandidate.candidate.name}
+                                        </h2>
+                                        <RiskBadge level={(selectedCandidate.riskLevel as any) || "Low"} />
+                                    </div>
+                                    <p style={{ margin: "3px 0 0", fontSize: 12.5, color: C.muted }}>
+                                        {selectedCandidate.candidate.email}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setSelectedCandidate(null)}
+                                style={{
+                                    width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+                                    border: `1px solid ${C.border}`, background: "rgba(255,255,255,0.04)",
+                                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                                    color: C.muted, transition: "all 0.15s",
+                                }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(0,184,212,0.15)"; (e.currentTarget as HTMLElement).style.color = "white"; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; (e.currentTarget as HTMLElement).style.color = C.muted; }}
+                            >
+                                <X size={16} />
+                            </button>
                         </div>
 
-                        <div className="space-y-3">
-                            <ScoreSelector label="Reliability" value={reliabilityScore} onChange={setReliabilityScore} />
-                            <ScoreSelector label="Communication" value={communicationScore} onChange={setCommunicationScore} />
-                            <ScoreSelector label="Commitment" value={commitmentScore} onChange={setCommitmentScore} />
-                            <ScoreSelector label="Rehire" value={rehireScore} onChange={setRehireScore} />
-                            <ScoreSelector label="Offer Outcome" value={offerOutcomeScore} onChange={setOfferOutcomeScore} />
+                        <div style={{ padding: "20px 24px 24px" }}>
+                            {/* Candidate details */}
+                            <div style={{
+                                background: "rgba(0,184,212,0.03)",
+                                borderRadius: 16, padding: "14px 16px", marginBottom: 20,
+                                border: "1px solid rgba(0,184,212,0.15)",
+                            }}>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
+                                    {[
+                                        { icon: <Briefcase size={12} />, text: selectedCandidate.candidate.jobTitle },
+                                        { icon: <Building2 size={12} />, text: selectedCandidate.candidate.department },
+                                        { icon: <Clock size={12} />, text: `${selectedCandidate.candidate.yearsOfExperience ?? 0} yrs exp` },
+                                        { icon: <Star size={12} fill={C.teal} />, text: `Trust: ${selectedCandidate.finalTrustScore}%` },
+                                    ].filter(i => i.text && i.text !== "N/A").map(item => (
+                                        <span key={item.text} style={{
+                                            display: "flex", alignItems: "center", gap: 5,
+                                            fontSize: 12, color: "white", fontWeight: 600,
+                                            background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "4px 10px",
+                                            border: "1px solid rgba(0,184,212,0.2)",
+                                        }}>
+                                            <span style={{ color: C.teal }}>{item.icon}</span>
+                                            {item.text}
+                                        </span>
+                                    ))}
+                                </div>
 
-                            <textarea
-                                rows={3}
-                                value={comments}
-                                onChange={(e) => setComments(e.target.value)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black/80 resize-none"
-                                placeholder="Additional comments..."
-                            />
+                                {/* Previous employments */}
+                                {(selectedCandidate.candidate.previousEmployments ?? []).length > 0 && (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                        <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                                            Previous Employers
+                                        </p>
+                                        {(selectedCandidate.candidate.previousEmployments ?? []).map((job, idx) => (
+                                            <div key={idx} style={{
+                                                background: "rgba(255,255,255,0.02)", borderRadius: 12, padding: "10px 14px",
+                                                border: `1px solid ${C.border}`,
+                                                display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8,
+                                            }}>
+                                                <div>
+                                                    <div style={{ fontSize: 13, fontWeight: 700, color: "white" }}>{job.companyName}</div>
+                                                    <div style={{ fontSize: 11.5, color: C.muted, marginTop: 2 }}>
+                                                        {job.employmentStartDate} – {job.employmentEndDate ?? "Present"}
+                                                    </div>
+                                                    {job.consentToContact && (
+                                                        <div style={{ fontSize: 11.5, color: C.body, marginTop: 4 }}>
+                                                            <span style={{ fontWeight: 600 }}>HR:</span> {job.hrName} · {job.hrEmail}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span style={{
+                                                    fontSize: 10.5, fontWeight: 700, padding: "3px 8px", borderRadius: 100, whiteSpace: "nowrap",
+                                                    ...(job.consentToContact
+                                                        ? { background: "rgba(34,197,94,0.15)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.25)" }
+                                                        : { background: "rgba(239,68,68,0.15)", color: "#fca5a5", border: "1px solid rgba(239,68,68,0.25)" }),
+                                                }}>
+                                                    {job.consentToContact ? "✓ Contact OK" : "✗ No Contact"}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
 
+                            {/* Score selectors */}
+                            <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 800, color: "white", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                                Evaluation Scores
+                            </p>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+                                <ScoreSelector label="Reliability" icon={<ShieldCheck size={14} />} value={reliabilityScore} onChange={setReliabilityScore} />
+                                <ScoreSelector label="Communication" icon={<MessageSquare size={14} />} value={communicationScore} onChange={setCommunicationScore} />
+                                <ScoreSelector label="Commitment" icon={<UserCheck size={14} />} value={commitmentScore} onChange={setCommitmentScore} />
+                                <ScoreSelector label="Rehire Potential" icon={<Users size={14} />} value={rehireScore} onChange={setRehireScore} />
+                                <ScoreSelector label="Offer Outcome" icon={<CheckCircle2 size={14} />} value={offerOutcomeScore} onChange={setOfferOutcomeScore} />
+                            </div>
+
+                            {/* Score preview */}
+                            {totalScore !== null && (
+                                <div style={{
+                                    background: `linear-gradient(135deg, ${C.teal}15, ${C.blue}10)`,
+                                    borderRadius: 14, padding: "12px 16px", marginBottom: 16,
+                                    border: `1px solid rgba(0,184,212,0.25)`,
+                                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                                }}>
+                                    <span style={{ fontSize: 13, fontWeight: 600, color: C.body }}>Projected HR Score</span>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                        <div style={{
+                                            width: 36, height: 36, borderRadius: "50%",
+                                            background: `linear-gradient(135deg, ${C.teal}, ${C.tealDark})`,
+                                            display: "flex", alignItems: "center", justifyContent: "center",
+                                            color: "white", fontSize: 12, fontWeight: 800,
+                                        }}>
+                                            {totalScore}
+                                        </div>
+                                        <span style={{ fontSize: 22, fontWeight: 800, color: C.teal }}>{totalScore}%</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Comments */}
+                            <div style={{ marginBottom: 20 }}>
+                                <label style={{
+                                    display: "block", fontSize: 11, fontWeight: 800, color: C.body,
+                                    textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8,
+                                }}>
+                                    Additional Comments
+                                </label>
+                                <textarea
+                                    rows={3}
+                                    value={comments}
+                                    onChange={e => setComments(e.target.value)}
+                                    placeholder="Add notes about this candidate's performance and behaviour…"
+                                    style={{
+                                        width: "100%", boxSizing: "border-box",
+                                        padding: "12px 14px",
+                                        background: "rgba(255,255,255,0.02)", border: `1px solid ${C.border}`,
+                                        borderRadius: 12, fontSize: 13, color: "white",
+                                        outline: "none", resize: "none", fontFamily: "'Inter', sans-serif",
+                                        transition: "border-color 0.15s, box-shadow 0.15s",
+                                    }}
+                                    onFocus={e => {
+                                        e.target.style.borderColor = C.teal;
+                                        e.target.style.boxShadow = "0 0 0 3px rgba(0,184,212,0.15)";
+                                        e.target.style.background = "rgba(255,255,255,0.05)";
+                                    }}
+                                    onBlur={e => {
+                                        e.target.style.borderColor = C.border;
+                                        e.target.style.boxShadow = "none";
+                                        e.target.style.background = "rgba(255,255,255,0.02)";
+                                    }}
+                                />
+                            </div>
+
+                            {/* Submit */}
                             <button
                                 onClick={handleSubmit}
-                                disabled={loadingSubmit}
-                                className="w-full py-2 rounded-xl bg-black text-white font-medium disabled:opacity-40 hover:scale-[1.02] transition"
+                                disabled={loadingSubmit || !allScoresFilled}
+                                style={{
+                                    width: "100%", padding: "14px 24px",
+                                    background: !allScoresFilled
+                                        ? "rgba(255,255,255,0.05)"
+                                        : "linear-gradient(135deg, #00b8d4, #1565c0)",
+                                    color: !allScoresFilled ? C.muted : "white",
+                                    border: "none", borderRadius: 14,
+                                    fontSize: 15, fontWeight: 700, cursor: allScoresFilled ? "pointer" : "not-allowed",
+                                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                                    transition: "all 0.2s", fontFamily: "'Inter', sans-serif",
+                                    boxShadow: allScoresFilled ? "0 4px 16px rgba(0,184,212,0.3)" : "none",
+                                    opacity: loadingSubmit ? 0.7 : 1,
+                                }}
                             >
-                                {loadingSubmit ? "Submitting..." : "Submit Feedback"}
+                                {loadingSubmit
+                                    ? <><Loader2 size={16} style={{ animation: "tl-spin 0.8s linear infinite" }} /> Submitting…</>
+                                    : !allScoresFilled
+                                    ? <><AlertCircle size={16} /> Fill all scores to continue</>
+                                    : <><CheckCircle2 size={16} /> Submit HR Feedback</>}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {toast && (
-                <Toast
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(null)}
-                />
-            )}
+            {/* Toast */}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </div>
     );
 };

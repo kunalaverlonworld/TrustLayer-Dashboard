@@ -49,27 +49,28 @@ export default function Sidebar() {
     const planLabel = (localStorage.getItem("plan") || "Basic").toUpperCase();
     const planColor =
         planLabel === "ENTERPRISE"
-            ? "from-amber-400 to-orange-500"
+            ? "from-amber-500/20 to-orange-600/20 border border-amber-500/30 text-amber-300"
             : planLabel === "PRO" || planLabel === "BUSINESS"
-            ? "from-[#00b8d4] to-[#1565c0]"
-            : "from-slate-400 to-slate-500";
+            ? "from-[#00b8d4]/20 to-[#1565c0]/20 border border-[#00b8d4]/30 text-[#00b8d4]"
+            : "from-slate-800/40 to-slate-900/40 border border-slate-700/30 text-slate-400";
 
     return (
         <aside
             className="fixed top-0 left-0 h-full w-64 flex flex-col z-50"
             style={{
-                background: "linear-gradient(180deg, #0a1f3d 0%, #0d2755 50%, #0a1f3d 100%)",
-                boxShadow: "4px 0 24px rgba(10,31,61,0.15)",
+                background: "linear-gradient(180deg, #050b14 0%, #091322 100%)",
+                borderRight: "1px solid rgba(255, 255, 255, 0.06)",
+                boxShadow: "none",
             }}
         >
             {/* Logo */}
-            <div className="px-6 pt-7 pb-6 border-b border-white/10">
+            <div className="px-6 pt-7 pb-6 border-b border-white/5">
                 <div className="flex items-center gap-3">
                     <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{
                             background: "linear-gradient(135deg, #00b8d4, #1565c0)",
-                            boxShadow: "0 4px 14px rgba(0,184,212,0.35)",
+                            boxShadow: "0 4px 14px rgba(0,184,212,0.25)",
                         }}
                     >
                         <ShieldCheck size={20} className="text-white" />
@@ -78,7 +79,7 @@ export default function Sidebar() {
                         <div className="text-white font-extrabold text-lg tracking-tight leading-none">
                             Trust<span className="text-[#00b8d4]">Layer</span>
                         </div>
-                        <div className="text-white/40 text-[10px] font-medium tracking-widest mt-0.5">
+                        <div className="text-white/30 text-[10px] font-medium tracking-widest mt-0.5">
                             AI ANALYTICS
                         </div>
                     </div>
@@ -89,10 +90,10 @@ export default function Sidebar() {
             <div className="px-4 pt-4 pb-2">
                 <div
                     className={`flex items-center gap-2 bg-gradient-to-r ${planColor} rounded-xl px-3 py-2.5`}
-                    style={{ boxShadow: "0 2px 10px rgba(0,184,212,0.2)" }}
+                    style={{ backdropFilter: "blur(5px)" }}
                 >
-                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                    <span className="text-white text-[10px] font-black tracking-widest">
+                    <div className="w-1.5 h-1.5 bg-[#00b8d4] rounded-full animate-pulse shadow-[0_0_8px_#00b8d4]" />
+                    <span className="text-[10px] font-black tracking-widest uppercase">
                         {planLabel} PLAN
                     </span>
                 </div>
@@ -100,7 +101,7 @@ export default function Sidebar() {
 
             {/* Navigation section label */}
             <div className="px-6 pt-4 pb-2">
-                <span className="text-white/30 text-[9px] font-bold uppercase tracking-[0.15em]">
+                <span className="text-white/20 text-[9px] font-bold uppercase tracking-[0.15em]">
                     Navigation
                 </span>
             </div>
