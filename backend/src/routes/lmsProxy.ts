@@ -1,8 +1,10 @@
 import express, { Request, Response } from "express";
+import { User } from "../models/User";
+import { Company } from "../models/Company";
 
 const router = express.Router();
 
-const LMS_BASE   = "https://license-system-v6ht.onrender.com";
+const LMS_BASE   = process.env.LMS_BASE || "https://license-system-v6ht.onrender.com";
 const LMS_API_KEY = process.env.LMS_API_KEY || "my-secret-key-123";
 const PRODUCT_ID  = "6a26929078d2d302b575cc10";
 
@@ -84,7 +86,7 @@ router.get("/active-license/:email", async (req: Request, res: Response) => {
     const productId = (req.query.productId as string) || PRODUCT_ID;
     const { status, data } = await proxyToLMS(
       "GET",
-      `/api/external/active-license/${encodeURIComponent(email)}?productId=${productId}`
+      `/api/external/actve-license/${encodeURIComponent(email)}?productId=${productId}`
     );
     return res.status(status).json(data);
   } catch (err: any) {
@@ -151,6 +153,73 @@ router.post("/password-sync", async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error("[LMSProxy] /password-sync error:", err.message);
     return res.status(502).json({ success: false, message: "LMS service unavailable" });
+  }
+});
+
+// ── POST /api/lms/webhook ─────────────────────────────────────────────────────
+// Webhook callback listener for LMS license activation events
+router.post("/webhook", async (req: Request, res: Response) => {
+  try {
+    const signature = req.headers["x-api-key"] || req.headers["x-webhook-secret"] || req.query.secret;
+    const webhookSecret = process.env.TL_WEBHOOK_SECRET || "tl-trustlayer-secret-2024-xK9mP3qR";
+
+    if (signature !== webhookSecret) {
+      console.warn("[LMS Webhook] Unauthorized request received. Invalid secret.");
+      return res.status(401).json({ success: false, message: "Unauthorized. Invalid secret key." });
+    }
+
+    const email = req.body.email || req.body.activeLicense?.email || req.body.customer?.email || req.body.userEmail;
+    const planName = req.body.planName || req.body.licenseType?.name || req.body.activeLicense?.licenseType?.name || req.body.license?.licenseType?.name || req.body.licenseName;
+    const licenseId = req.body.licenseId || req.body.licenseTypeId || req.body.licenseType?._id || req.body.activeLicense?.licenseType?._id || req.body.license?.licenseType?._id;
+    const status = req.body.status || req.body.activeLicense?.status || req.body.license?.status || "active";
+
+    console.log(`[LMS Webhook] Processing activation: Email: "${email}", Plan: "${planName}", License: "${licenseId}", Status: "${status}"`);
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Missing email in payload" });
+    }
+
+    // Find user
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      console.warn(`[LMS Webhook] User not found: "${email}"`);
+      return res.status(404).json({ success: false, message: "User not found in TrustLayer" });
+    }
+
+    // Map plans dynamically
+    let localPlan: "basic" | "starter" | "pro" | "enterprise" = "basic";
+    const normalizedPlan = (planName || "").toLowerCase();
+
+    if (normalizedPlan.includes("enterprise")) {
+      localPlan = "enterprise";
+    } else if (normalizedPlan.includes("pro") || normalizedPlan.includes("professional") || normalizedPlan.includes("business")) {
+      localPlan = "pro";
+    } else if (normalizedPlan.includes("starter") || licenseId === "6a27b7c3df1fbf19bce318e1") {
+      localPlan = "starter";
+    } else if (normalizedPlan.includes("basic") || licenseId === "6a27b79fdf1fbf19bce318d6") {
+      localPlan = "basic";
+    }
+
+    // Update Company
+    const company = await Company.findById(user.companyId);
+    if (!company) {
+      console.warn(`[LMS Webhook] Company not found for user: "${email}"`);
+      return res.status(404).json({ success: false, message: "Company not found for user" });
+    }
+
+    company.subscriptionPlan = localPlan;
+    await company.save();
+
+    console.log(`[LMS Webhook] Successfully updated company "${company.name}" subscriptionPlan to "${localPlan}"`);
+
+    return res.status(200).json({
+      success: true,
+      message: "Webhook processed and subscription updated successfully",
+      updatedPlan: localPlan,
+    });
+  } catch (err: any) {
+    console.error("[LMS Webhook] Error processing webhook:", err.message);
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 

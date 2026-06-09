@@ -3,7 +3,7 @@ import { Schema, model, Document } from "mongoose";
 export interface ICompany extends Document {
     name: string;
     companyCode: string;
-    subscriptionPlan: "basic" | "pro" | "enterprise";
+    subscriptionPlan: "basic" | "starter" | "pro" | "enterprise";
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -18,7 +18,7 @@ const companySchema = new Schema<ICompany>(
         },
         subscriptionPlan: {
             type: String,
-            enum: ["basic", "pro", "enterprise"],
+            enum: ["basic", "starter", "pro", "enterprise"],
             default: "basic",
         },
         isActive: {
