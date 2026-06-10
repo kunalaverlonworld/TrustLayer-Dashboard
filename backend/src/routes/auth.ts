@@ -65,6 +65,14 @@ router.get("/me", async (req, res) => {
 // Called by TrustLayer landing page to get a dashboard JWT without re-login.
 // Body: { email, name, planName, licenseId }
 // Flow: find/create user in dashboard DB → return JWT → frontend redirects to /sso
+const mapPlanName = (name: string): "basic" | "starter" | "pro" | "enterprise" => {
+  const norm = (name || '').toLowerCase().trim();
+  if (norm.includes('enterprise')) return 'enterprise';
+  if (norm.includes('pro') || norm.includes('business')) return 'pro';
+  if (norm.includes('starter')) return 'starter';
+  return 'basic';
+};
+
 router.post("/sso", async (req, res) => {
   try {
     const { email, name, planName, licenseId } = req.body;
@@ -72,6 +80,8 @@ router.post("/sso", async (req, res) => {
     if (!email) {
       return res.status(400).json({ message: "email is required" });
     }
+
+    const targetPlan = mapPlanName(planName);
 
     // Find or auto-create user
     let user = await User.findOne({ email });
@@ -83,7 +93,7 @@ router.post("/sso", async (req, res) => {
         company = await Company.create({
           name: "Default Company",
           companyCode: "DEFAULT",
-          subscriptionPlan: planName ?? "basic",
+          subscriptionPlan: targetPlan,
         });
       }
 
@@ -100,8 +110,8 @@ router.post("/sso", async (req, res) => {
     } else {
       // If user already exists, update their company's subscription plan to match
       const company = await Company.findById(user.companyId);
-      if (company && planName && company.subscriptionPlan !== planName) {
-        company.subscriptionPlan = planName;
+      if (company && company.subscriptionPlan !== targetPlan) {
+        company.subscriptionPlan = targetPlan;
         await company.save();
       }
     }
@@ -111,7 +121,7 @@ router.post("/sso", async (req, res) => {
         userId:    user._id,
         companyId: user.companyId,
         role:      user.role,
-        planName:  planName ?? "basic",
+        planName:  targetPlan,
         licenseId: licenseId ?? "",
         sso:       true,
       },
@@ -121,7 +131,7 @@ router.post("/sso", async (req, res) => {
 
     return res.json({
       token,
-      planName: planName ?? "basic",
+      planName: targetPlan,
       licenseId: licenseId ?? "",
     });
   } catch (error: any) {
