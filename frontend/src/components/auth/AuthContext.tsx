@@ -43,6 +43,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
             // Handle both { user: {...} } and { success: true, user: {...} } shapes
             const userData = response.data?.user ?? response.data;
+            const planName = response.data?.planName;
+
+            if (planName) {
+                localStorage.setItem("plan", planName);
+            }
 
             if (!userData || !userData._id) {
                 // Token valid but no user found — clear session

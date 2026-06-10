@@ -20,10 +20,13 @@ const LoginPage: React.FC = () => {
 
         try {
             const res = await API.login(email, password);
-            const { token } = res.data;
+            const { token, planName } = res.data;
 
             // Store token
             localStorage.setItem("token", token);
+            if (planName) {
+                localStorage.setItem("plan", planName);
+            }
 
             // Refresh global auth state
             await refreshUser();

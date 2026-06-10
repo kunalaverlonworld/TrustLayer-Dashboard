@@ -29,6 +29,7 @@ export const API = {
     login: (email: string, password: string) =>
         apiClient.post<{
             token: string;
+            planName?: string;
             user: {
                 id: string;
                 email: string;

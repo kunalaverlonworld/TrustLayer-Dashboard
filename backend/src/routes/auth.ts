@@ -30,7 +30,10 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    return res.json({ token });
+    const company = await Company.findById(user.companyId);
+    const planName = company?.subscriptionPlan ?? "basic";
+
+    return res.json({ token, planName });
   } catch (error) {
     return res.status(500).json({ message: "Login failed", error });
   }
@@ -48,7 +51,11 @@ router.get("/me", async (req, res) => {
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
     const user    = await User.findById(payload.userId);
     if (!user) return res.status(401).json({ message: "User not found" });
-    return res.json({ user });
+
+    const company = await Company.findById(user.companyId);
+    const planName = company?.subscriptionPlan ?? "basic";
+
+    return res.json({ user, planName });
   } catch {
     return res.status(401).json({ message: "Invalid or expired token" });
   }
@@ -90,6 +97,13 @@ router.post("/sso", async (req, res) => {
         passwordHash,
         isActive:     true,
       });
+    } else {
+      // If user already exists, update their company's subscription plan to match
+      const company = await Company.findById(user.companyId);
+      if (company && planName && company.subscriptionPlan !== planName) {
+        company.subscriptionPlan = planName;
+        await company.save();
+      }
     }
 
     const token = jwt.sign(
