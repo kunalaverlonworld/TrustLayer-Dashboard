@@ -75,7 +75,7 @@ export default function Header() {
     return (
         <>
         <header
-            className="w-full sticky top-0 z-45"
+            className="w-full sticky top-0 z-40"
             style={{
                 background: "rgba(255, 255, 255, 0.75)",
                 backdropFilter: "blur(20px)",
