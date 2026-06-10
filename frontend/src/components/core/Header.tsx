@@ -4,6 +4,8 @@ import { Bell, Search, X, User, CreditCard, LogOut, ChevronDown, Settings, Menu 
 import { useAuth } from "../auth/AuthContext";
 import { useSearch } from "../../context/SearchContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { API } from "../../api/api";
+
 
 function getInitials(name?: string): string {
     if (!name) return "U";
@@ -39,6 +41,74 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [showProfile, setShowProfile]   = useState(false);
     const dropRef = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLDivElement>(null);
+
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+
+    // Fetch candidate and employee lists for suggestions
+    const loadSuggestions = async () => {
+        if (!user || suggestions.length > 0 || isLoadingSuggestions) return;
+        setIsLoadingSuggestions(true);
+        try {
+            const [candidatesRes, employeesRes] = await Promise.all([
+                API.getAllTrackedTrustScores().catch(() => ({ data: [] })),
+                API.getAllEmployees().catch(() => ({ data: { data: [] } }))
+            ]);
+
+            const candidateItems = (candidatesRes.data || []).map(item => ({
+                id: item.applicationId,
+                name: item.candidate?.name || "Unknown",
+                email: item.candidate?.email || "",
+                subtitle: item.candidate?.jobTitle || "Candidate",
+                type: "candidate" as const
+            }));
+
+            const employeeItems = (employeesRes.data?.data || []).map((item: any) => ({
+                id: item._id || item.employeeId,
+                name: item.name || "Unknown",
+                email: item.email || "",
+                subtitle: item.designation || item.department || "Employee",
+                type: "employee" as const
+            }));
+
+            setSuggestions([...candidateItems, ...employeeItems]);
+        } catch (err) {
+            console.error("Failed to load search suggestions:", err);
+        } finally {
+            setIsLoadingSuggestions(false);
+        }
+    };
+
+    // Load suggestions on mount/auth change
+    useEffect(() => {
+        if (user) {
+            loadSuggestions();
+        }
+    }, [user]);
+
+    // Close suggestions dropdown on click outside
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+                setIsSearchFocused(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    const filteredSuggestions = React.useMemo(() => {
+        if (!searchQuery.trim()) return [];
+        const query = searchQuery.toLowerCase();
+        return suggestions.filter(
+            item =>
+                item.name.toLowerCase().includes(query) ||
+                item.email.toLowerCase().includes(query) ||
+                item.subtitle.toLowerCase().includes(query)
+        ).slice(0, 5);
+    }, [searchQuery, suggestions]);
 
     const initials       = getInitials(user?.name);
     const avatarGradient = getAvatarGradient(user?.name);
@@ -112,24 +182,97 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
                 </div>
 
                 {/* Center: Search */}
-                <div
-                    className="flex items-center gap-2 px-4 py-2 rounded-2xl flex-1 max-w-md"
-                    style={{ background: "rgba(10, 31, 61, 0.03)", border: "1px solid #e2eaf3" }}
-                >
-                    <Search size={15} className="text-slate-500 flex-shrink-0" />
-                    <input
-                        type="text"
-                        placeholder="Search by name, email, or role..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="bg-transparent outline-none text-sm w-full placeholder-slate-400 text-slate-800"
-                    />
-                    {searchQuery && (
-                        <button
-                            onClick={() => setSearchQuery("")}
-                            className="text-slate-400 hover:text-slate-700 text-xs font-bold px-1 transition-colors"
-                        >✕</button>
-                    )}
+                <div style={{ position: "relative", flex: 1, maxWidth: "448px" }} ref={searchRef}>
+                    <div
+                        className="flex items-center gap-2 px-4 py-2 rounded-2xl"
+                        style={{ background: "rgba(10, 31, 61, 0.03)", border: "1px solid #e2eaf3" }}
+                    >
+                        <Search size={15} className="text-slate-500 flex-shrink-0" />
+                        <input
+                            type="text"
+                            placeholder="Search by name, email, or role..."
+                            value={searchQuery}
+                            onFocus={() => {
+                                setIsSearchFocused(true);
+                                loadSuggestions();
+                            }}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setIsSearchFocused(true);
+                                loadSuggestions();
+                            }}
+                            className="bg-transparent outline-none text-sm w-full placeholder-slate-400 text-slate-800"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery("")}
+                                className="text-slate-400 hover:text-slate-700 text-xs font-bold px-1 transition-colors"
+                            >✕</button>
+                        )}
+                    </div>
+
+                    {/* Suggestions Dropdown */}
+                    <AnimatePresence>
+                        {isSearchFocused && filteredSuggestions.length > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                                transition={{ duration: 0.15 }}
+                                style={{
+                                    position: "absolute",
+                                    top: "100%",
+                                    left: 0,
+                                    right: 0,
+                                    marginTop: 8,
+                                    background: "white",
+                                    borderRadius: 16,
+                                    border: "1px solid #e2eaf3",
+                                    boxShadow: "0 10px 30px rgba(10,31,61,0.08)",
+                                    overflow: "hidden",
+                                    zIndex: 50,
+                                }}
+                            >
+                                <div className="max-h-60 overflow-y-auto py-1.5">
+                                    <div className="px-4 py-1 text-[10px] font-black tracking-wider text-slate-400 uppercase border-b border-[#e2eaf3] mb-1.5">
+                                        Suggestions
+                                    </div>
+                                    {filteredSuggestions.map((item, idx) => (
+                                        <button
+                                            key={`${item.type}-${item.id}-${idx}`}
+                                            onClick={() => {
+                                                setSearchQuery(item.name);
+                                                setIsSearchFocused(false);
+                                            }}
+                                            className="w-full px-4 py-2 flex items-center justify-between text-left hover:bg-[#edf5fb] transition-colors"
+                                            style={{
+                                                background: "none",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                fontFamily: "'Inter', sans-serif"
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black uppercase flex-shrink-0"
+                                                    style={{
+                                                        background: item.type === "candidate" ? "rgba(0,184,212,0.1)" : "rgba(124,58,237,0.1)",
+                                                        color: item.type === "candidate" ? "#00b8d4" : "#7c3aed"
+                                                    }}
+                                                >
+                                                    {item.type === "candidate" ? "Can" : "Emp"}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="text-xs font-bold text-slate-800 truncate">{item.name}</div>
+                                                    <div className="text-[10px] text-slate-400 truncate">{item.subtitle} • {item.email}</div>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* Right: Bell + Profile dropdown */}
