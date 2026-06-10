@@ -12,17 +12,17 @@ import {
 
 // ─── Design tokens (matches Dashboard) ──────────────────────────────────────
 const C = {
-    navy:      "#ffffff", // text-white matching headers/titles
-    navyMid:   "#94a3b8", // sub-headers/labels
+    navy:      "#0a1f3d", // dark navy matching headers/titles
+    navyMid:   "#0d2d5e", // sub-headers/labels
     teal:      "#00b8d4",
     tealDark:  "#0097b2",
     tealLight: "rgba(0,184,212,0.08)",
     blue:      "#1565c0",
-    body:      "#cbd5e1", // body text/info values
-    muted:     "#64748b", // minor muted details
-    border:    "rgba(255, 255, 255, 0.08)", // subtle translucent borders
+    body:      "#475569", // body text/info values
+    muted:     "#94a3b8", // minor muted details
+    border:    "#e2eaf3", // subtle light borders
     bg:        "transparent",
-    white:     "rgba(10, 31, 61, 0.45)", // card background
+    white:     "#ffffff", // card background
 };
 
 // ─── Score selector ──────────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ const SCORE_COLORS = [
 const ScoreSelector: React.FC<ScoreSelectorProps> = ({ label, icon, value, onChange }) => (
     <div
         style={{
-            background: "rgba(255, 255, 255, 0.02)",
+            background: "rgba(10, 31, 61, 0.015)",
             border: `1.5px solid ${C.border}`,
             borderRadius: 14,
             padding: "14px 16px",
@@ -60,7 +60,7 @@ const ScoreSelector: React.FC<ScoreSelectorProps> = ({ label, icon, value, onCha
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{ color: C.teal, display: "flex", alignItems: "center" }}>{icon}</div>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "white", fontFamily: "'Inter', sans-serif" }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: C.navy, fontFamily: "'Inter', sans-serif" }}>
                     {label}
                 </span>
             </div>
@@ -105,23 +105,23 @@ const ScoreSelector: React.FC<ScoreSelectorProps> = ({ label, icon, value, onCha
                             transform: "scale(1.05)",
                             boxShadow: `0 4px 12px ${SCORE_COLORS[score]}40`,
                         } : {
-                            background: "rgba(255, 255, 255, 0.04)",
+                            background: "#ffffff",
                             borderColor: C.border,
-                            color: C.muted,
+                            color: C.body,
                         }),
                     }}
                     onMouseEnter={e => {
                         if (value !== score) {
                             (e.currentTarget as HTMLElement).style.borderColor = SCORE_COLORS[score];
-                            (e.currentTarget as HTMLElement).style.color = "white";
+                            (e.currentTarget as HTMLElement).style.color = SCORE_COLORS[score];
                             (e.currentTarget as HTMLElement).style.background = SCORE_COLORS[score] + "18";
                         }
                     }}
                     onMouseLeave={e => {
                         if (value !== score) {
                             (e.currentTarget as HTMLElement).style.borderColor = C.border;
-                            (e.currentTarget as HTMLElement).style.color = C.muted;
-                            (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.04)";
+                            (e.currentTarget as HTMLElement).style.color = C.body;
+                            (e.currentTarget as HTMLElement).style.background = "#ffffff";
                         }
                     }}
                 >
@@ -176,9 +176,9 @@ const Toast: React.FC<{
 // ─── Risk badge ───────────────────────────────────────────────────────────────
 const RiskBadge: React.FC<{ level: "Low" | "Moderate" | "High" }> = ({ level }) => {
     const cfg = {
-        Low:      { bg: "rgba(34,197,94,0.15)",   color: "#4ade80", dot: "#22c55e" },
-        Moderate: { bg: "rgba(234,179,8,0.15)",   color: "#fef08a", dot: "#eab308" },
-        High:     { bg: "rgba(239,68,68,0.15)",   color: "#fca5a5", dot: "#ef4444" },
+        Low:      { bg: "rgba(16,185,129,0.1)",  color: "#059669", dot: "#10b981" },
+        Moderate: { bg: "rgba(245,158,11,0.1)",  color: "#d97706", dot: "#f59e0b" },
+        High:     { bg: "rgba(239,68,68,0.1)",   color: "#dc2626", dot: "#ef4444" },
     }[level];
     return (
         <span style={{
@@ -351,7 +351,7 @@ const HrFeedbackPage: React.FC = () => {
                 @keyframes tl-slide-up { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
                 @keyframes tl-modal-in { from { opacity:0; transform:scale(0.95) translateY(16px); } to { opacity:1; transform:scale(1) translateY(0); } }
                 @keyframes tl-spin { to { transform: rotate(360deg); } }
-                .tl-card-row:hover { background: rgba(0, 184, 212, 0.08) !important; box-shadow: 0 0 20px rgba(0, 184, 212, 0.15) !important; transform: translateY(-1px); border-color: rgba(0, 184, 212, 0.3) !important; }
+                .tl-card-row:hover { background: rgba(0, 184, 212, 0.04) !important; box-shadow: 0 6px 20px rgba(10, 31, 61, 0.04) !important; transform: translateY(-1px); border-color: rgba(0, 184, 212, 0.2) !important; }
                 .tl-email-btn:hover:not(:disabled) { background: linear-gradient(135deg,${C.teal},${C.tealDark}) !important; color: white !important; border-color: transparent !important; }
                 .tl-feedback-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,184,212,0.3) !important; }
             `}</style>
@@ -372,7 +372,7 @@ const HrFeedbackPage: React.FC = () => {
                             <ClipboardList size={19} color="white" />
                         </div>
                         <div>
-                            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: "white", letterSpacing: "-0.02em" }}>
+                            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: C.navy, letterSpacing: "-0.02em" }}>
                                 HR Feedback
                             </h1>
                             <p style={{ margin: 0, fontSize: 12.5, color: C.muted, marginTop: 1 }}>
@@ -388,7 +388,7 @@ const HrFeedbackPage: React.FC = () => {
                         display: "flex", alignItems: "center", gap: 8,
                         background: C.white, border: `1px solid ${C.border}`,
                         borderRadius: 12, padding: "8px 16px",
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                        boxShadow: "0 4px 20px rgba(10, 31, 61, 0.04)",
                         backdropFilter: "blur(10px)",
                     }}>
                         <div style={{
@@ -400,7 +400,7 @@ const HrFeedbackPage: React.FC = () => {
                         </div>
                         <div>
                             <p style={{ margin: 0, fontSize: 10, color: C.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Pending</p>
-                            <p style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "white", lineHeight: 1 }}>{filteredCandidates.length}</p>
+                            <p style={{ margin: 0, fontSize: 18, fontWeight: 800, color: C.navy, lineHeight: 1 }}>{filteredCandidates.length}</p>
                         </div>
                     </div>
                     {submittedCount > 0 && (
@@ -432,7 +432,7 @@ const HrFeedbackPage: React.FC = () => {
                     display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                     padding: "72px 24px", background: C.white, borderRadius: 20,
                     border: `1px solid ${C.border}`,
-                    boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
+                    boxShadow: "0 4px 24px rgba(10, 31, 61, 0.04)",
                     backdropFilter: "blur(10px)",
                     animation: "tl-slide-up 0.4s ease",
                 }}>
@@ -444,7 +444,7 @@ const HrFeedbackPage: React.FC = () => {
                     }}>
                         <CheckCircle2 size={32} color={C.teal} />
                     </div>
-                    <h3 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 800, color: "white" }}>
+                    <h3 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 800, color: C.navy }}>
                         All Caught Up!
                     </h3>
                     <p style={{ margin: 0, fontSize: 14, color: C.muted, textAlign: "center", maxWidth: 320 }}>
@@ -470,7 +470,7 @@ const HrFeedbackPage: React.FC = () => {
                                     background: C.white,
                                     borderRadius: 18,
                                     border: `1px solid ${C.border}`,
-                                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                                    boxShadow: "0 4px 20px rgba(10, 31, 61, 0.04)",
                                     backdropFilter: "blur(10px)",
                                     transition: "all 0.2s ease",
                                     animation: `tl-slide-up 0.35s ease ${i * 0.04}s both`,
@@ -483,7 +483,7 @@ const HrFeedbackPage: React.FC = () => {
                                 {/* Info */}
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 3 }}>
-                                        <span style={{ fontSize: 15, fontWeight: 700, color: "white" }}>
+                                        <span style={{ fontSize: 15, fontWeight: 700, color: C.navy }}>
                                             {c.candidate.name}
                                         </span>
                                         <RiskBadge level={(c.riskLevel as any) || "Low"} />
@@ -524,7 +524,7 @@ const HrFeedbackPage: React.FC = () => {
                                             display: "flex", alignItems: "center", gap: 7,
                                             padding: "9px 16px", borderRadius: 12,
                                             border: `1px solid ${C.border}`,
-                                            background: "rgba(255, 255, 255, 0.04)", color: C.body,
+                                            background: "rgba(10, 31, 61, 0.03)", color: C.body,
                                             fontSize: 13, fontWeight: 600, cursor: "pointer",
                                             transition: "all 0.2s",
                                             fontFamily: "'Inter', sans-serif",
@@ -571,7 +571,7 @@ const HrFeedbackPage: React.FC = () => {
                     onClick={() => setSelectedCandidate(null)}
                     style={{
                         position: "fixed", inset: 0, zIndex: 50,
-                        background: "rgba(3, 8, 17, 0.75)", backdropFilter: "blur(12px)",
+                        background: "rgba(10, 31, 61, 0.4)", backdropFilter: "blur(8px)",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         padding: 16,
                     }}
@@ -579,14 +579,14 @@ const HrFeedbackPage: React.FC = () => {
                     <div
                         onClick={e => e.stopPropagation()}
                         style={{
-                            background: "linear-gradient(135deg, #091526 0%, #030811 100%)", borderRadius: 24,
+                            background: "linear-gradient(135deg, #FFFFFF 0%, #F4F8FD 100%)", borderRadius: 24,
                             width: "100%", maxWidth: 580,
                             maxHeight: "90vh", overflowY: "auto",
-                            boxShadow: "0 32px 80px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.3)",
-                            border: "1px solid rgba(0, 184, 212, 0.25)",
+                            boxShadow: "0 32px 80px rgba(10, 31, 61, 0.15), 0 8px 24px rgba(10, 31, 61, 0.1)",
+                            border: "1px solid #e2eaf3",
                             animation: "tl-modal-in 0.35s cubic-bezier(0.22,1,0.36,1)",
                             scrollbarWidth: "thin",
-                            scrollbarColor: "rgba(255,255,255,0.1) transparent",
+                            scrollbarColor: "rgba(10,31,61,0.1) transparent",
                         }}
                     >
                         {/* Modal header */}
@@ -594,14 +594,14 @@ const HrFeedbackPage: React.FC = () => {
                             padding: "22px 24px 18px",
                             borderBottom: `1px solid ${C.border}`,
                             display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
-                            position: "sticky", top: 0, background: "rgba(9, 21, 38, 0.95)", zIndex: 5, borderRadius: "24px 24px 0 0",
+                            position: "sticky", top: 0, background: "rgba(255, 255, 255, 0.95)", zIndex: 5, borderRadius: "24px 24px 0 0",
                             backdropFilter: "blur(10px)",
                         }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                                 <Avatar name={selectedCandidate.candidate.name} size={52} />
                                 <div>
                                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                                        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "white", letterSpacing: "-0.01em" }}>
+                                        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: C.navy, letterSpacing: "-0.01em" }}>
                                             {selectedCandidate.candidate.name}
                                         </h2>
                                         <RiskBadge level={(selectedCandidate.riskLevel as any) || "Low"} />
@@ -615,12 +615,12 @@ const HrFeedbackPage: React.FC = () => {
                                 onClick={() => setSelectedCandidate(null)}
                                 style={{
                                     width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-                                    border: `1px solid ${C.border}`, background: "rgba(255,255,255,0.04)",
+                                    border: `1px solid ${C.border}`, background: "rgba(10,31,61,0.03)",
                                     cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                                     color: C.muted, transition: "all 0.15s",
                                 }}
-                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(0,184,212,0.15)"; (e.currentTarget as HTMLElement).style.color = "white"; }}
-                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; (e.currentTarget as HTMLElement).style.color = C.muted; }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.1)"; (e.currentTarget as HTMLElement).style.color = "#ef4444"; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(10,31,61,0.03)"; (e.currentTarget as HTMLElement).style.color = C.muted; }}
                             >
                                 <X size={16} />
                             </button>
@@ -629,7 +629,7 @@ const HrFeedbackPage: React.FC = () => {
                         <div style={{ padding: "20px 24px 24px" }}>
                             {/* Candidate details */}
                             <div style={{
-                                background: "rgba(0,184,212,0.03)",
+                                background: "rgba(0,184,212,0.05)",
                                 borderRadius: 16, padding: "14px 16px", marginBottom: 20,
                                 border: "1px solid rgba(0,184,212,0.15)",
                             }}>
@@ -642,8 +642,8 @@ const HrFeedbackPage: React.FC = () => {
                                     ].filter(i => i.text && i.text !== "N/A").map(item => (
                                         <span key={item.text} style={{
                                             display: "flex", alignItems: "center", gap: 5,
-                                            fontSize: 12, color: "white", fontWeight: 600,
-                                            background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: "4px 10px",
+                                            fontSize: 12, color: C.navy, fontWeight: 600,
+                                            background: "#ffffff", borderRadius: 8, padding: "4px 10px",
                                             border: "1px solid rgba(0,184,212,0.2)",
                                         }}>
                                             <span style={{ color: C.teal }}>{item.icon}</span>
@@ -660,12 +660,12 @@ const HrFeedbackPage: React.FC = () => {
                                         </p>
                                         {(selectedCandidate.candidate.previousEmployments ?? []).map((job, idx) => (
                                             <div key={idx} style={{
-                                                background: "rgba(255,255,255,0.02)", borderRadius: 12, padding: "10px 14px",
+                                                background: "#ffffff", borderRadius: 12, padding: "10px 14px",
                                                 border: `1px solid ${C.border}`,
                                                 display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8,
                                             }}>
                                                 <div>
-                                                    <div style={{ fontSize: 13, fontWeight: 700, color: "white" }}>{job.companyName}</div>
+                                                    <div style={{ fontSize: 13, fontWeight: 700, color: C.navy }}>{job.companyName}</div>
                                                     <div style={{ fontSize: 11.5, color: C.muted, marginTop: 2 }}>
                                                         {job.employmentStartDate} – {job.employmentEndDate ?? "Present"}
                                                     </div>
@@ -678,8 +678,8 @@ const HrFeedbackPage: React.FC = () => {
                                                 <span style={{
                                                     fontSize: 10.5, fontWeight: 700, padding: "3px 8px", borderRadius: 100, whiteSpace: "nowrap",
                                                     ...(job.consentToContact
-                                                        ? { background: "rgba(34,197,94,0.15)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.25)" }
-                                                        : { background: "rgba(239,68,68,0.15)", color: "#fca5a5", border: "1px solid rgba(239,68,68,0.25)" }),
+                                                        ? { background: "rgba(16,185,129,0.1)", color: "#059669", border: "1px solid rgba(16,185,129,0.25)" }
+                                                        : { background: "rgba(239,68,68,0.1)", color: "#dc2626", border: "1px solid rgba(239,68,68,0.25)" }),
                                                 }}>
                                                     {job.consentToContact ? "✓ Contact OK" : "✗ No Contact"}
                                                 </span>
@@ -690,7 +690,7 @@ const HrFeedbackPage: React.FC = () => {
                             </div>
 
                             {/* Score selectors */}
-                            <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 800, color: "white", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                            <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 800, color: C.navy, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                                 Evaluation Scores
                             </p>
                             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
@@ -740,20 +740,20 @@ const HrFeedbackPage: React.FC = () => {
                                     style={{
                                         width: "100%", boxSizing: "border-box",
                                         padding: "12px 14px",
-                                        background: "rgba(255,255,255,0.02)", border: `1px solid ${C.border}`,
-                                        borderRadius: 12, fontSize: 13, color: "white",
+                                        background: "#ffffff", border: `1px solid ${C.border}`,
+                                        borderRadius: 12, fontSize: 13, color: C.navy,
                                         outline: "none", resize: "none", fontFamily: "'Inter', sans-serif",
                                         transition: "border-color 0.15s, box-shadow 0.15s",
                                     }}
                                     onFocus={e => {
                                         e.target.style.borderColor = C.teal;
                                         e.target.style.boxShadow = "0 0 0 3px rgba(0,184,212,0.15)";
-                                        e.target.style.background = "rgba(255,255,255,0.05)";
+                                        e.target.style.background = "#ffffff";
                                     }}
                                     onBlur={e => {
                                         e.target.style.borderColor = C.border;
                                         e.target.style.boxShadow = "none";
-                                        e.target.style.background = "rgba(255,255,255,0.02)";
+                                        e.target.style.background = "#ffffff";
                                     }}
                                 />
                             </div>
@@ -765,7 +765,7 @@ const HrFeedbackPage: React.FC = () => {
                                 style={{
                                     width: "100%", padding: "14px 24px",
                                     background: !allScoresFilled
-                                        ? "rgba(255,255,255,0.05)"
+                                        ? "rgba(10,31,61,0.05)"
                                         : "linear-gradient(135deg, #00b8d4, #1565c0)",
                                     color: !allScoresFilled ? C.muted : "white",
                                     border: "none", borderRadius: 14,

@@ -49,22 +49,21 @@ export default function Sidebar() {
     const planLabel = (localStorage.getItem("plan") || "Basic").toUpperCase();
     const planColor =
         planLabel === "ENTERPRISE"
-            ? "from-amber-500/20 to-orange-600/20 border border-amber-500/30 text-amber-300"
+            ? "from-amber-500/10 to-orange-600/10 border border-amber-500/20 text-amber-800"
             : planLabel === "PRO" || planLabel === "BUSINESS"
-            ? "from-[#00b8d4]/20 to-[#1565c0]/20 border border-[#00b8d4]/30 text-[#00b8d4]"
-            : "from-slate-800/40 to-slate-900/40 border border-slate-700/30 text-slate-400";
+            ? "from-[#e0f7fa]/60 to-[#b2ebf2]/60 border border-[#00b8d4]/20 text-[#0097b2]"
+            : "from-slate-100 to-slate-200 border border-slate-200 text-slate-600";
 
     return (
         <aside
-            className="fixed top-0 left-0 h-full w-64 flex flex-col z-50"
+            className="fixed top-0 left-0 h-full w-64 flex flex-col z-50 bg-white"
             style={{
-                background: "linear-gradient(180deg, #050b14 0%, #091322 100%)",
-                borderRight: "1px solid rgba(255, 255, 255, 0.06)",
-                boxShadow: "none",
+                borderRight: "1px solid #e2eaf3",
+                boxShadow: "0 0 24px rgba(10,31,61,0.04)",
             }}
         >
             {/* Logo */}
-            <div className="px-6 pt-7 pb-6 border-b border-white/5">
+            <div className="px-6 pt-7 pb-6 border-b border-slate-100">
                 <div className="flex items-center gap-3">
                     <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -76,10 +75,10 @@ export default function Sidebar() {
                         <ShieldCheck size={20} className="text-white" />
                     </div>
                     <div>
-                        <div className="text-white font-extrabold text-lg tracking-tight leading-none">
+                        <div className="text-[#0a1f3d] font-extrabold text-lg tracking-tight leading-none">
                             Trust<span className="text-[#00b8d4]">Layer</span>
                         </div>
-                        <div className="text-white/30 text-[10px] font-medium tracking-widest mt-0.5">
+                        <div className="text-slate-400 text-[10px] font-medium tracking-widest mt-0.5">
                             AI ANALYTICS
                         </div>
                     </div>
@@ -101,7 +100,7 @@ export default function Sidebar() {
 
             {/* Navigation section label */}
             <div className="px-6 pt-4 pb-2">
-                <span className="text-white/20 text-[9px] font-bold uppercase tracking-[0.15em]">
+                <span className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.15em]">
                     Navigation
                 </span>
             </div>
@@ -114,10 +113,10 @@ export default function Sidebar() {
                         to={item.path}
                         end={item.path === "/dashboard"}
                         className={({ isActive }) =>
-                            `group flex items-center justify-between px-4 py-3 rounded-2xl font-medium text-sm transition-all duration-200 ${
+                            `group flex items-center justify-between px-4 py-3 rounded-2xl font-semibold text-sm transition-all duration-200 ${
                                 isActive
-                                    ? "bg-white/15 text-white shadow-sm"
-                                    : "text-white/55 hover:text-white hover:bg-white/8"
+                                    ? "bg-[#e0f7fa]/60 text-[#0097b2] shadow-xs"
+                                    : "text-slate-600 hover:text-[#0097b2] hover:bg-[#e0f7fa]/30"
                             }`
                         }
                     >
@@ -127,8 +126,8 @@ export default function Sidebar() {
                                     <span
                                         className={`${
                                             isActive
-                                                ? "text-[#00b8d4]"
-                                                : "text-white/40 group-hover:text-white/70"
+                                                ? "text-[#0097b2]"
+                                                : "text-slate-400 group-hover:text-[#0097b2]"
                                         } transition-colors`}
                                     >
                                         {item.icon}
@@ -144,7 +143,7 @@ export default function Sidebar() {
                                     {isActive && (
                                         <ChevronRight
                                             size={14}
-                                            className="text-[#00b8d4]"
+                                            className="text-[#0097b2]"
                                         />
                                     )}
                                 </div>
@@ -155,14 +154,14 @@ export default function Sidebar() {
             </nav>
 
             {/* Bottom: Logout */}
-            <div className="p-4 border-t border-white/10">
+            <div className="p-4 border-t border-slate-100">
                 <button
                     onClick={logout}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-white/50 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 text-sm font-medium group"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all duration-200 text-sm font-semibold group"
                 >
                     <LogOut
                         size={18}
-                        className="group-hover:text-rose-400 transition-colors"
+                        className="group-hover:text-rose-600 transition-colors"
                     />
                     <span>Sign Out</span>
                 </button>

@@ -45,48 +45,48 @@ export default function Header() {
 
     return (
         <header
-            className="w-full sticky top-0 z-40"
+            className="w-full sticky top-0 z-45"
             style={{
-                background: "rgba(6, 13, 26, 0.75)",
+                background: "rgba(255, 255, 255, 0.75)",
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
-                borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-                boxShadow: "0 4px 30px rgba(0, 0, 0, 0.15)",
+                borderBottom: "1px solid #e2eaf3",
+                boxShadow: "0 4px 30px rgba(10, 31, 61, 0.03)",
             }}
         >
             <div className="h-16 px-8 lg:px-10 flex items-center justify-between gap-4">
 
                 {/* Left: Page context */}
                 <div className="flex flex-col">
-                    <span className="text-white font-bold text-sm tracking-tight hidden md:block">
+                    <span className="text-[#0a1f3d] font-bold text-sm tracking-tight hidden md:block">
                         Welcome back,{"  "}
                         <span className="text-[#00b8d4]">{user?.name || "User"}</span>
                     </span>
-                    <span className="text-xs text-slate-400 font-medium hidden md:block">
+                    <span className="text-xs text-slate-500 font-medium hidden md:block">
                         {timeString}
                     </span>
                 </div>
 
                 {/* Center: Search */}
                 <div
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl flex-1 max-w-md"
+                    className="flex items-center gap-2 px-4 py-2 rounded-2xl flex-1 max-w-md"
                     style={{
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        background: "rgba(10, 31, 61, 0.03)",
+                        border: "1px solid #e2eaf3",
                     }}
                 >
-                    <Search size={15} className="text-slate-400 flex-shrink-0" />
+                    <Search size={15} className="text-slate-500 flex-shrink-0" />
                     <input
                         type="text"
                         placeholder="Search by name, email, or role..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="bg-transparent outline-none text-sm w-full placeholder-slate-400 text-white"
+                        className="bg-transparent outline-none text-sm w-full placeholder-slate-400 text-slate-800"
                     />
                     {searchQuery && (
                         <button
                             onClick={() => setSearchQuery("")}
-                            className="text-slate-400 hover:text-white text-xs font-bold px-1 transition-colors"
+                            className="text-slate-400 hover:text-slate-700 text-xs font-bold px-1 transition-colors"
                         >
                             ✕
                         </button>
@@ -100,21 +100,21 @@ export default function Header() {
                     <button
                         className="relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
                         style={{
-                            background: "rgba(255,255,255,0.04)",
-                            border: "1px solid rgba(255,255,255,0.08)",
+                            background: "rgba(10, 31, 61, 0.03)",
+                            border: "1px solid #e2eaf3",
                         }}
                         title="Notifications"
                     >
-                        <Bell size={16} className="text-slate-300" />
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-[#060D1A]" />
+                        <Bell size={16} className="text-slate-600" />
+                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
                     </button>
 
                     {/* Profile chip */}
                     <div
                         className="flex items-center gap-3 px-3 py-1.5 rounded-2xl cursor-pointer group transition-all duration-200"
                         style={{
-                            background: "rgba(255,255,255,0.04)",
-                            border: "1px solid rgba(255,255,255,0.08)",
+                            background: "rgba(10, 31, 61, 0.03)",
+                            border: "1px solid #e2eaf3",
                         }}
                         onClick={logout}
                         title="Click to sign out"
@@ -129,14 +129,14 @@ export default function Header() {
                             {initials}
                         </div>
                         <div className="hidden md:flex flex-col">
-                            <span className="text-white text-xs font-bold leading-none">
+                            <span className="text-[#0a1f3d] text-xs font-bold leading-none">
                                 {user?.name || "User"}
                             </span>
-                            <span className="text-slate-400 text-[10px] mt-0.5 capitalize font-medium">
+                            <span className="text-slate-500 text-[10px] mt-0.5 capitalize font-medium">
                                 {user?.role || "Admin"}
                             </span>
                         </div>
-                        <ChevronDown size={13} className="text-slate-400 group-hover:text-white transition-colors hidden md:block" />
+                        <ChevronDown size={13} className="text-slate-500 group-hover:text-slate-800 transition-colors hidden md:block" />
                     </div>
                 </div>
             </div>
