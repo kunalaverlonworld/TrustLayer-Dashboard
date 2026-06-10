@@ -40,6 +40,7 @@ export interface TrustLayerDashboardItem {
         jobTitle: string;
         department: string;
         stage: string;
+        location?: string;
         yearsOfExperience?: number;
         previousEmployments?: Employment[];
     };
