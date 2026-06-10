@@ -167,12 +167,16 @@ const CandidatesPage: React.FC = () => {
     if (loading)
         return (
             <div className="flex flex-col justify-center items-center h-[60vh] gap-5">
-                <div className="relative">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                        style={{ background: "linear-gradient(135deg, rgba(0,184,212,0.15), rgba(21,101,192,0.15))" }}>
-                        <ShieldCheck className="w-8 h-8 text-[#00b8d4]" />
+                <div className="relative w-16 h-16 flex items-center justify-center">
+                    <div className="absolute inset-0 border-2 border-slate-200/60 border-t-[#00b8d4] rounded-full animate-spin" />
+                    <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
+                        style={{
+                            background: "linear-gradient(135deg, rgba(0,184,212,0.12), rgba(21,101,192,0.12))",
+                        }}
+                    >
+                        <ShieldCheck className="w-6 h-6 text-[#00b8d4]" />
                     </div>
-                    <div className="absolute -top-1 -right-1 w-5 h-5 border-2 border-slate-200 border-t-[#00b8d4] rounded-full animate-spin" />
                 </div>
                 <div className="text-center">
                     <p className="font-bold text-slate-800 text-sm">Loading Candidate Trust Scores</p>
