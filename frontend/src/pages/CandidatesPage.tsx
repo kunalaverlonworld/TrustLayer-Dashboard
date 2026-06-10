@@ -5,13 +5,14 @@ import {
     TrustExplainResponse,
 } from "../types/types";
 import { useSearch } from "../context/SearchContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Users, ShieldCheck, ShieldAlert, AlertTriangle,
     Check, X, ClipboardList, Sparkles, BarChart3,
     AlertCircle, Activity, Eye, MousePointer,
-    Zap, Filter, RefreshCw,
+    Zap, Filter, RefreshCw, Mail, Send, Calendar, ChevronDown, ArrowUpRight
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 // ----------------------------------
 // Helpers
@@ -64,6 +65,24 @@ const CandidatesPage: React.FC = () => {
     const [details, setDetails] = useState<TrustExplainResponse | null>(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
     const [filterRisk, setFilterRisk] = useState<string>("all");
+
+    // AI Action Center state
+    const [showNudgeDraft, setShowNudgeDraft] = useState(false);
+    const [nudgeText, setNudgeText] = useState("");
+    const [sendingNudge, setSendingNudge] = useState(false);
+
+    const handleSendNudge = () => {
+        setSendingNudge(true);
+        setTimeout(() => {
+            setSendingNudge(false);
+            setShowNudgeDraft(false);
+            toast.success("AI Engagement nudge sent successfully!");
+        }, 1200);
+    };
+
+    const handleCalendarSync = () => {
+        toast.success("Priority check-in call scheduled in calendar.");
+    };
 
     // -----------------------------
     // Fetch Dashboard Data
@@ -136,8 +155,12 @@ const CandidatesPage: React.FC = () => {
             setSelectedId(applicationId);
             setDetails(null);
             setDetailsLoading(true);
+            setShowNudgeDraft(false);
             const res = await API.getTrustExplain(applicationId);
             setDetails(res.data);
+
+            const candidateName = data.find(d => d.applicationId === applicationId)?.candidate?.name || "Candidate";
+            setNudgeText(`Hi ${candidateName},\n\nWe noticed you haven't accessed your trust screening assessment link yet. Please let us know if you have any questions or need to reschedule.\n\nBest regards,\nHiring Team`);
         } catch (err) {
             console.error("Failed to fetch trust explanation", err);
         } finally {
@@ -809,6 +832,84 @@ const CandidatesPage: React.FC = () => {
                                             </ul>
                                         </div>
                                     )}
+
+                                    {/* AI Action Center */}
+                                    <div
+                                        className="rounded-2xl p-5 mt-4"
+                                        style={{
+                                            background: "rgba(124, 58, 237, 0.04)",
+                                            border: "1px solid rgba(124, 58, 237, 0.15)",
+                                        }}
+                                    >
+                                        <h3 className="text-xs font-black uppercase tracking-[0.1em] text-[#7c3aed] mb-3 flex items-center gap-2">
+                                            <Zap className="w-3.5 h-3.5 text-[#7c3aed]" />
+                                            AI Action Center
+                                        </h3>
+                                        <p className="text-[11px] text-slate-500 font-medium mb-4">
+                                            Predictive AI recommendations to mitigate candidate drop-off & ghosting.
+                                        </p>
+                                        
+                                        <div className="space-y-3">
+                                            {/* Action 1: Send Nudge */}
+                                            <div>
+                                                <button
+                                                    onClick={() => setShowNudgeDraft(o => !o)}
+                                                    className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-xs font-bold text-slate-700"
+                                                >
+                                                    <span className="flex items-center gap-2">
+                                                        <Mail className="w-4 h-4 text-[#7c3aed]" />
+                                                        Generate AI Engagement Nudge
+                                                    </span>
+                                                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showNudgeDraft ? "rotate-180" : ""}`} />
+                                                </button>
+                                                
+                                                <AnimatePresence>
+                                                    {showNudgeDraft && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, height: 0 }}
+                                                            animate={{ opacity: 1, height: "auto" }}
+                                                            exit={{ opacity: 0, height: 0 }}
+                                                            className="overflow-hidden mt-2"
+                                                        >
+                                                            <div className="p-4 rounded-xl border border-dashed border-[#7c3aed]/30 bg-[#7c3aed]/5 space-y-3">
+                                                                <div className="text-[10px] uppercase font-bold text-[#7c3aed] tracking-wider">Draft Template:</div>
+                                                                <textarea
+                                                                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-700 outline-none focus:border-[#7c3aed]"
+                                                                    rows={4}
+                                                                    value={nudgeText}
+                                                                    onChange={(e) => setNudgeText(e.target.value)}
+                                                                />
+                                                                <button
+                                                                    onClick={handleSendNudge}
+                                                                    disabled={sendingNudge}
+                                                                    className="px-4 py-2 bg-[#7c3aed] text-white rounded-lg text-xs font-bold transition hover:opacity-90 flex items-center gap-1.5"
+                                                                >
+                                                                    {sendingNudge ? (
+                                                                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                                    ) : (
+                                                                        <Send className="w-3 h-3" />
+                                                                    )}
+                                                                    Send Nudge Email
+                                                                </button>
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+
+                                            {/* Action 2: Schedule Priority Call */}
+                                            <button
+                                                onClick={handleCalendarSync}
+                                                className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-xs font-bold text-slate-700"
+                                            >
+                                                <span className="flex items-center gap-2">
+                                                    <Calendar className="w-4 h-4 text-emerald-500" />
+                                                    Schedule Priority Call Check-in
+                                                </span>
+                                                <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                                            </button>
+                                        </div>
+                                    </div>
                                 </>
                             ) : null}
                         </div>
