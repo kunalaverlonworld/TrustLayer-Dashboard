@@ -23,7 +23,7 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
     const lowRiskPercent = total ? Math.round((lowRiskCount / total) * 100) : 0;
 
     // Concentric Circular gauge variables
-    const radius = 46;
+    const radius = 38;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (avgTrustScore / 100) * circumference;
 
@@ -31,17 +31,17 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
     const riskAlerts = data.filter(d => d.riskLevel === "High").slice(0, 3);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 font-sans">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 font-sans">
             {/* CARD 1: COMPANY TRUST HEALTH GAUGE */}
             <div
-                className="bg-white rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-lg"
+                className="bg-white rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-lg"
                 style={{
                     border: "1px solid #e2eaf3",
                     boxShadow: "0 4px 24px rgba(10, 31, 61, 0.04)",
                 }}
             >
                 <div>
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-[#00b8d4]" />
                             Company Health
@@ -50,31 +50,31 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
                             Active
                         </span>
                     </div>
-                    <p className="text-xs text-slate-500 font-medium leading-relaxed mb-6">
+                    <p className="text-xs text-slate-500 font-medium leading-relaxed mb-4">
                         Aggregated hiring reliability score based on active applicant interaction metrics.
                     </p>
                 </div>
 
                 <div className="flex items-center justify-around">
                     {/* SVG Gauge */}
-                    <div className="relative w-32 h-32 flex items-center justify-center">
+                    <div className="relative w-24 h-24 flex items-center justify-center">
                         <svg className="w-full h-full transform -rotate-90">
                             {/* Background Circle */}
                             <circle
-                                cx="64"
-                                cy="64"
+                                cx="48"
+                                cy="48"
                                 r={radius}
                                 stroke="#f1f5f9"
-                                strokeWidth="8"
+                                strokeWidth="6.5"
                                 fill="transparent"
                             />
                             {/* Foreground Circle */}
                             <circle
-                                cx="64"
-                                cy="64"
+                                cx="48"
+                                cy="48"
                                 r={radius}
                                 stroke="url(#healthGrad)"
-                                strokeWidth="8"
+                                strokeWidth="6.5"
                                 fill="transparent"
                                 strokeDasharray={circumference}
                                 strokeDashoffset={strokeDashoffset}
@@ -91,21 +91,21 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
                         </svg>
                         {/* Text Overlay */}
                         <div className="absolute flex flex-col items-center">
-                            <span className="text-2xl font-black text-slate-800 tracking-tight">{avgTrustScore}%</span>
-                            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Avg Trust</span>
+                            <span className="text-xl font-black text-slate-800 tracking-tight">{avgTrustScore}%</span>
+                            <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Avg Trust</span>
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2.5">
                         <div className="flex flex-col">
-                            <span className="text-xl font-extrabold text-slate-800">{total}</span>
-                            <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider">Total Tracked</span>
+                            <span className="text-lg font-extrabold text-slate-800">{total}</span>
+                            <span className="text-[8px] text-slate-400 font-black uppercase tracking-wider">Total Tracked</span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-xl font-extrabold text-slate-800">
+                            <span className="text-lg font-extrabold text-slate-800">
                                 {total ? Math.round(data.reduce((acc, curr) => acc + curr.totalOpens + curr.totalClicks, 0) / total) : 0}
                             </span>
-                            <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider">Avg Events</span>
+                            <span className="text-[8px] text-slate-400 font-black uppercase tracking-wider">Avg Events</span>
                         </div>
                     </div>
                 </div>
@@ -113,18 +113,18 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
 
             {/* CARD 2: RISK BREAKDOWN (BAR CHART) */}
             <div
-                className="bg-white rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-lg"
+                className="bg-white rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-lg"
                 style={{
                     border: "1px solid #e2eaf3",
                     boxShadow: "0 4px 24px rgba(10, 31, 61, 0.04)",
                 }}
             >
                 <div>
-                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-4">
+                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-3">
                         <BarChart3 className="w-4 h-4 text-[#1565c0]" />
                         Risk Allocation
                     </h3>
-                    <p className="text-xs text-slate-500 font-medium leading-relaxed mb-6">
+                    <p className="text-xs text-slate-500 font-medium leading-relaxed mb-4">
                         Real-time division of candidates into risk pools computed by predictive AI models.
                     </p>
                 </div>
@@ -150,18 +150,18 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
                     </div>
 
                     {/* Stats List */}
-                    <div className="grid grid-cols-3 gap-2 pt-2">
-                        <div className="flex flex-col p-2 bg-emerald-50/50 rounded-xl border border-emerald-100/50 text-center">
-                            <span className="text-sm font-black text-emerald-600">{lowRiskPercent}%</span>
-                            <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider mt-0.5">Low ({lowRiskCount})</span>
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                        <div className="flex flex-col p-1.5 bg-emerald-50/50 rounded-xl border border-emerald-100/50 text-center">
+                            <span className="text-xs font-black text-emerald-600">{lowRiskPercent}%</span>
+                            <span className="text-[8px] text-slate-400 font-black uppercase tracking-wider mt-0.5">Low ({lowRiskCount})</span>
                         </div>
-                        <div className="flex flex-col p-2 bg-amber-50/50 rounded-xl border border-amber-100/50 text-center">
-                            <span className="text-sm font-black text-amber-600">{modRiskPercent}%</span>
-                            <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider mt-0.5">Mod ({modRiskCount})</span>
+                        <div className="flex flex-col p-1.5 bg-amber-50/50 rounded-xl border border-amber-100/50 text-center">
+                            <span className="text-xs font-black text-amber-600">{modRiskPercent}%</span>
+                            <span className="text-[8px] text-slate-400 font-black uppercase tracking-wider mt-0.5">Mod ({modRiskCount})</span>
                         </div>
-                        <div className="flex flex-col p-2 bg-rose-50/50 rounded-xl border border-rose-100/50 text-center">
-                            <span className="text-sm font-black text-rose-600">{highRiskPercent}%</span>
-                            <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider mt-0.5">High ({highRiskCount})</span>
+                        <div className="flex flex-col p-1.5 bg-rose-50/50 rounded-xl border border-rose-100/50 text-center">
+                            <span className="text-xs font-black text-rose-600">{highRiskPercent}%</span>
+                            <span className="text-[8px] text-slate-400 font-black uppercase tracking-wider mt-0.5">High ({highRiskCount})</span>
                         </div>
                     </div>
                 </div>
@@ -169,23 +169,23 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
 
             {/* CARD 3: AI PREDICTIVE RISK ALERTS */}
             <div
-                className="bg-white rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-lg"
+                className="bg-white rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-lg"
                 style={{
                     border: "1px solid #e2eaf3",
                     boxShadow: "0 4px 24px rgba(10, 31, 61, 0.04)",
                 }}
             >
                 <div>
-                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-4">
+                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-3">
                         <ShieldAlert className="w-4 h-4 text-rose-600" />
                         AI Ghosting Alerts
                     </h3>
-                    <p className="text-xs text-slate-500 font-medium leading-relaxed mb-4">
+                    <p className="text-xs text-slate-500 font-medium leading-relaxed mb-3">
                         Candidates flagged with severe ghosting warning signals. Actions required:
                     </p>
                 </div>
 
-                <div className="space-y-3 flex-1 flex flex-col justify-center">
+                <div className="space-y-2.5 flex-1 flex flex-col justify-center">
                     {!riskAlerts.length ? (
                         <div className="flex flex-col items-center py-4 text-center">
                             <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center mb-2">
@@ -198,7 +198,7 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
                         riskAlerts.map(c => (
                             <div
                                 key={c.applicationId}
-                                className="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                                className="flex items-center justify-between p-2 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
                             >
                                 <div className="min-w-0">
                                     <p className="text-xs font-bold text-slate-800 truncate">{c.candidate.name}</p>
@@ -206,7 +206,7 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
                                 </div>
                                 <button
                                     onClick={() => onAnalyzeCandidate(c.applicationId)}
-                                    className="flex items-center gap-1 text-[10px] font-bold text-slate-600 hover:text-[#00b8d4] bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                                    className="flex items-center gap-1 text-[10px] font-bold text-slate-600 hover:text-[#00b8d4] bg-white border border-slate-200 px-2 py-1 rounded-lg transition-colors flex-shrink-0"
                                 >
                                     Analyze <ArrowRight className="w-2.5 h-2.5" />
                                 </button>

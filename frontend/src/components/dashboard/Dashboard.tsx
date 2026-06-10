@@ -4,7 +4,6 @@ import {
     TrustLayerDashboardItem,
     TrustExplainResponse,
 } from "../../types/types";
-import SummaryCards from "./SummaryCards";
 import DashboardInsights from "./DashboardInsights";
 import { useSearch } from "../../context/SearchContext";
 import {
@@ -268,9 +267,6 @@ const Dashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* ─── Summary Cards ────────────────────────────── */}
-            <SummaryCards data={sortedData} />
-
             {/* ─── AI Insights & Visualizations ────────────── */}
             <DashboardInsights data={sortedData} onAnalyzeCandidate={handleViewDetails} />
 
@@ -351,20 +347,22 @@ const Dashboard: React.FC = () => {
                     boxShadow: "0 4px 24px rgba(10, 31, 61, 0.04)",
                 }}
             >
-                <div className="overflow-x-auto">
+                <div className="overflow-auto max-h-[420px] custom-scrollbar">
                     <table className="w-full text-sm">
                         <thead>
                             <tr
                                 style={{
                                     background: "#f8fafc",
-                                    borderBottom: "1px solid #e2eaf3",
                                 }}
                             >
                                 {["Candidate", "Role & Pipeline", "Activity", "Trust Score", "Risk Level", "Actions"].map(col => (
                                     <th
                                         key={col}
-                                        className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-500"
-                                        style={{ textAlign: col === "Actions" ? "center" : "left" }}
+                                        className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-500 sticky top-0 bg-[#f8fafc] z-10"
+                                        style={{ 
+                                            textAlign: col === "Actions" ? "center" : "left",
+                                            borderBottom: "1px solid #e2eaf3",
+                                        }}
                                     >
                                         {col}
                                     </th>
