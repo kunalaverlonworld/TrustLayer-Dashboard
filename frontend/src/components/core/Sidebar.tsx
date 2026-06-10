@@ -50,8 +50,10 @@ export default function Sidebar() {
     const planColor =
         planLabel === "ENTERPRISE"
             ? "from-amber-500/10 to-orange-600/10 border border-amber-500/20 text-amber-800"
-            : planLabel === "PRO" || planLabel === "BUSINESS"
+            : planLabel === "PRO" || planLabel === "PROFESSIONAL" || planLabel === "BUSINESS"
             ? "from-[#e0f7fa]/60 to-[#b2ebf2]/60 border border-[#00b8d4]/20 text-[#0097b2]"
+            : planLabel === "STARTER"
+            ? "from-blue-50 to-indigo-50 border border-indigo-100 text-indigo-700"
             : "from-slate-100 to-slate-200 border border-slate-200 text-slate-600";
 
     return (
