@@ -7,6 +7,7 @@ import {
 import DashboardInsights from "./DashboardInsights";
 import SummaryCards from "./SummaryCards";
 import { useSearch } from "../../context/SearchContext";
+import { motion } from "framer-motion";
 import {
     Users, ShieldCheck, ShieldAlert, AlertTriangle,
     Check, X, ClipboardList, Sparkles, BarChart3,
@@ -211,11 +212,40 @@ const Dashboard: React.FC = () => {
             </div>
         );
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.04
+            }
+        }
+    } as const;
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 10 },
+        show: { 
+            opacity: 1, 
+            y: 0,
+            transition: {
+                type: "spring" as const,
+                stiffness: 220,
+                damping: 24
+            }
+        }
+    } as const;
+
     return (
-        <div className="min-h-screen pb-10" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="min-h-screen pb-10" 
+            style={{ fontFamily: "'Inter', sans-serif" }}
+        >
 
             {/* ─── Page Header ─────────────────────────────── */}
-            <div className="flex items-start justify-between mb-7">
+            <motion.div variants={itemVariants} className="flex items-start justify-between mb-7">
                 <div>
                     <div className="flex items-center gap-2 mb-2">
                         <div
@@ -266,16 +296,20 @@ const Dashboard: React.FC = () => {
                         Refresh
                     </button>
                 </div>
-            </div>
+            </motion.div>
 
             {/* ─── Summary Metric Cards Row ─────────────────── */}
-            <SummaryCards data={sortedData} />
+            <motion.div variants={itemVariants}>
+                <SummaryCards data={sortedData} />
+            </motion.div>
 
             {/* ─── AI Insights & Visualizations ────────────── */}
-            <DashboardInsights data={sortedData} onAnalyzeCandidate={handleViewDetails} />
+            <motion.div variants={itemVariants}>
+                <DashboardInsights data={sortedData} onAnalyzeCandidate={handleViewDetails} />
+            </motion.div>
 
             {/* ─── Filters row ──────────────────────────────── */}
-            <div className="flex items-center justify-between mb-4 gap-3">
+            <motion.div variants={itemVariants} className="flex items-center justify-between mb-4 gap-3">
                 <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
                         <Filter className="w-3.5 h-3.5" />
@@ -318,7 +352,7 @@ const Dashboard: React.FC = () => {
                 <span className="text-xs text-slate-500 font-medium">
                     Showing <span className="font-bold text-[#00b8d4]">{sortedData.length}</span> results
                 </span>
-            </div>
+            </motion.div>
 
             {/* ─── Empty State ──────────────────────────────── */}
             {!sortedData.length ? (
@@ -344,7 +378,8 @@ const Dashboard: React.FC = () => {
             ) : (
 
             /* ─── Data Table ────────────────────────────────── */
-            <div
+            <motion.div
+                variants={itemVariants}
                 className="rounded-2xl overflow-hidden bg-white"
                 style={{
                     border: "1px solid #e2eaf3",
@@ -538,7 +573,7 @@ const Dashboard: React.FC = () => {
                         AI Powered
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
             )}
 
@@ -769,7 +804,7 @@ const Dashboard: React.FC = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </motion.div>
     );
 };
 

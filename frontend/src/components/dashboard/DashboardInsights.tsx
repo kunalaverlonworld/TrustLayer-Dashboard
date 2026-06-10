@@ -1,6 +1,7 @@
 import React from "react";
 import { TrustLayerDashboardItem } from "../../types/types";
 import { ShieldCheck, ShieldAlert, Sparkles, BarChart3, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface DashboardInsightsProps {
     data: TrustLayerDashboardItem[];
@@ -69,7 +70,7 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
                                 fill="transparent"
                             />
                             {/* Foreground Circle */}
-                            <circle
+                            <motion.circle
                                 cx="48"
                                 cy="48"
                                 r={radius}
@@ -77,9 +78,10 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
                                 strokeWidth="6.5"
                                 fill="transparent"
                                 strokeDasharray={circumference}
-                                strokeDashoffset={strokeDashoffset}
+                                initial={{ strokeDashoffset: circumference }}
+                                animate={{ strokeDashoffset: strokeDashoffset }}
+                                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                                 strokeLinecap="round"
-                                style={{ transition: "stroke-dashoffset 0.8s ease-in-out" }}
                             />
                             {/* Gradients */}
                             <defs>
@@ -132,20 +134,29 @@ export default function DashboardInsights({ data, onAnalyzeCandidate }: Dashboar
                 <div className="space-y-4">
                     {/* Stacked Horizontal Bar */}
                     <div className="w-full h-3.5 bg-slate-100 rounded-full flex overflow-hidden">
-                        <div
-                            style={{ width: `${lowRiskPercent}%`, background: "linear-gradient(90deg, #10b981, #059669)" }}
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${lowRiskPercent}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
+                            style={{ background: "linear-gradient(90deg, #10b981, #059669)" }}
                             title={`Low Risk: ${lowRiskPercent}%`}
-                            className="h-full transition-all duration-500"
+                            className="h-full"
                         />
-                        <div
-                            style={{ width: `${modRiskPercent}%`, background: "linear-gradient(90deg, #f59e0b, #d97706)" }}
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${modRiskPercent}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+                            style={{ background: "linear-gradient(90deg, #f59e0b, #d97706)" }}
                             title={`Moderate Risk: ${modRiskPercent}%`}
-                            className="h-full transition-all duration-500"
+                            className="h-full"
                         />
-                        <div
-                            style={{ width: `${highRiskPercent}%`, background: "linear-gradient(90deg, #ef4444, #b91c1c)" }}
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${highRiskPercent}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
+                            style={{ background: "linear-gradient(90deg, #ef4444, #b91c1c)" }}
                             title={`High Risk: ${highRiskPercent}%`}
-                            className="h-full transition-all duration-500"
+                            className="h-full"
                         />
                     </div>
 
