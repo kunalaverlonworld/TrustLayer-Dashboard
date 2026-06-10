@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { TrustLayerDashboardItem } from "../../types/types";
-import { Users, Shield, ShieldAlert, AlertTriangle, ShieldCheck, TrendingUp } from "lucide-react";
+import { Users, ShieldAlert, AlertTriangle, ShieldCheck, TrendingUp } from "lucide-react";
 
 interface Props {
     data: TrustLayerDashboardItem[];
@@ -23,106 +23,82 @@ const SummaryCards: React.FC<Props> = ({ data }) => {
         {
             title: "Total Candidates",
             value: metrics.total,
-            subtitle: "Tracked in pipeline",
-            icon: <Users className="w-5 h-5" />,
+            subtitle: "In pipeline",
+            icon: <Users className="w-4 h-4" />,
             iconColor: "text-sky-500",
-            iconBg: "rgba(14,165,233,0.1)",
-            accent: "linear-gradient(135deg, #0ea5e9, #0284c7)",
-            glowColor: "rgba(14,165,233,0.2)",
-            border: "rgba(14,165,233,0.15)",
+            iconBg: "rgba(14,165,233,0.08)",
         },
         {
             title: "Avg Trust Score",
             value: `${metrics.avgTrust}%`,
-            subtitle: "Across all candidates",
-            icon: <TrendingUp className="w-5 h-5" />,
-            iconColor: "text-[#1565c0]",
-            iconBg: "rgba(21,101,192,0.1)",
-            accent: "linear-gradient(135deg, #1565c0, #0d2d5e)",
-            glowColor: "rgba(21,101,192,0.2)",
-            border: "rgba(21,101,192,0.15)",
+            subtitle: "Overall average",
+            icon: <TrendingUp className="w-4 h-4" />,
+            iconColor: "text-indigo-500",
+            iconBg: "rgba(99,102,241,0.08)",
         },
         {
             title: "High Risk",
             value: metrics.highRisk,
-            subtitle: "Needs immediate review",
-            icon: <ShieldAlert className="w-5 h-5" />,
+            subtitle: "Action required",
+            icon: <ShieldAlert className="w-4 h-4" />,
             iconColor: "text-rose-500",
-            iconBg: "rgba(239,68,68,0.1)",
-            accent: "linear-gradient(135deg, #ef4444, #b91c1c)",
-            glowColor: "rgba(239,68,68,0.2)",
-            border: "rgba(239,68,68,0.15)",
+            iconBg: "rgba(239,68,68,0.08)",
         },
         {
             title: "Moderate Risk",
             value: metrics.moderateRisk,
             subtitle: "Monitor closely",
-            icon: <AlertTriangle className="w-5 h-5" />,
+            icon: <AlertTriangle className="w-4 h-4" />,
             iconColor: "text-amber-500",
-            iconBg: "rgba(245,158,11,0.1)",
-            accent: "linear-gradient(135deg, #f59e0b, #d97706)",
-            glowColor: "rgba(245,158,11,0.2)",
-            border: "rgba(245,158,11,0.15)",
+            iconBg: "rgba(245,158,11,0.08)",
         },
         {
             title: "Low Risk",
             value: metrics.lowRisk,
             subtitle: "Safe to proceed",
-            icon: <ShieldCheck className="w-5 h-5" />,
+            icon: <ShieldCheck className="w-4 h-4" />,
             iconColor: "text-emerald-500",
-            iconBg: "rgba(16,185,129,0.1)",
-            accent: "linear-gradient(135deg, #10b981, #059669)",
-            glowColor: "rgba(16,185,129,0.2)",
-            border: "rgba(16,185,129,0.15)",
+            iconBg: "rgba(16,185,129,0.08)",
         },
     ];
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-            {cards.map((c) => (
+        <div 
+            className="bg-white rounded-2xl flex flex-col md:flex-row items-stretch mb-6 overflow-hidden"
+            style={{
+                border: "1px solid #e2eaf3",
+                boxShadow: "0 4px 24px rgba(10, 31, 61, 0.04)",
+            }}
+        >
+            {cards.map((c, idx) => (
                 <div
                     key={c.title}
-                    className="group relative bg-white rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 cursor-default"
+                    className="flex-1 flex items-center gap-4 px-6 py-4 transition-all duration-200 hover:bg-slate-50/50 cursor-default"
                     style={{
-                        border: `1px solid #e2eaf3`,
-                        boxShadow: `0 4px 24px rgba(10, 31, 61, 0.04)`,
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.boxShadow = `0 8px 30px ${c.glowColor}`;
-                        e.currentTarget.style.borderColor = c.iconColor.includes("sky") ? "rgba(14,165,233,0.4)" : c.iconColor.includes("1565") ? "rgba(21,101,192,0.4)" : c.iconColor.includes("rose") ? "rgba(239,68,68,0.4)" : c.iconColor.includes("amber") ? "rgba(245,158,11,0.4)" : "rgba(16,185,129,0.4)";
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.boxShadow = `0 4px 24px rgba(10, 31, 61, 0.04)`;
-                        e.currentTarget.style.borderColor = `#e2eaf3`;
+                        borderRight: idx < cards.length - 1 ? "1px solid #f1f5f9" : "none",
                     }}
                 >
-                    {/* Top gradient accent bar */}
-                    <div
-                        className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
-                        style={{ background: c.accent }}
-                    />
-
                     {/* Icon */}
                     <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{ background: c.iconBg }}
                     >
                         <span className={c.iconColor}>{c.icon}</span>
                     </div>
 
-                    {/* Value */}
-                    <div className="text-[#0a1f3d] text-2xl font-black tracking-tight leading-none mb-1">
-                        {c.value}
-                    </div>
-
-                    {/* Title */}
-                    <div className="text-slate-600 text-xs font-bold mb-0.5 tracking-tight">
-                        {c.title}
-                    </div>
-
-                    {/* Subtitle */}
-                    <div className="text-slate-400 text-[10px] font-medium">
-                        {c.subtitle}
+                    {/* Stats */}
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider leading-none mb-1.5 truncate">
+                            {c.title}
+                        </span>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-[#0a1f3d] text-lg font-black tracking-tight leading-none">
+                                {c.value}
+                            </span>
+                            <span className="text-slate-400 text-[10px] font-medium leading-none truncate hidden lg:inline">
+                                {c.subtitle}
+                            </span>
+                        </div>
                     </div>
                 </div>
             ))}

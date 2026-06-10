@@ -5,6 +5,7 @@ import {
     TrustExplainResponse,
 } from "../../types/types";
 import DashboardInsights from "./DashboardInsights";
+import SummaryCards from "./SummaryCards";
 import { useSearch } from "../../context/SearchContext";
 import {
     Users, ShieldCheck, ShieldAlert, AlertTriangle,
@@ -266,6 +267,9 @@ const Dashboard: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            {/* ─── Summary Metric Cards Row ─────────────────── */}
+            <SummaryCards data={sortedData} />
 
             {/* ─── AI Insights & Visualizations ────────────── */}
             <DashboardInsights data={sortedData} onAnalyzeCandidate={handleViewDetails} />
