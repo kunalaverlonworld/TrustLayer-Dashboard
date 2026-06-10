@@ -231,27 +231,57 @@ const Dashboard: React.FC = () => {
             {/* ─── Page Header ─────────────────────────────── */}
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-7 gap-4">
                 <div>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-2.5">
                         <div
-                            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.12em]"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.15em] shadow-[0_0_12px_rgba(0,184,212,0.06)]"
                             style={{
-                                background: "rgba(0,184,212,0.15)",
-                                border: "1px solid rgba(0,184,212,0.3)",
+                                background: "linear-gradient(135deg, rgba(0,184,212,0.1) 0%, rgba(21,101,192,0.05) 100%)",
+                                border: "1px solid rgba(0,184,212,0.25)",
                                 color: "#00b8d4",
                             }}
                         >
-                            <Sparkles className="w-3 h-3" />
+                            <motion.span
+                                animate={{ 
+                                    rotate: [0, 15, -15, 0],
+                                    scale: [1, 1.15, 0.9, 1.1, 1],
+                                }}
+                                transition={{ 
+                                    repeat: Infinity, 
+                                    duration: 4, 
+                                    ease: "easeInOut",
+                                    repeatDelay: 1
+                                }}
+                                className="flex items-center justify-center text-[#00b8d4]"
+                            >
+                                <Sparkles className="w-3.5 h-3.5" />
+                            </motion.span>
                             AI Trust Engine
                         </div>
+
                         <div
-                            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.12em]"
-                            style={{
-                                background: isRefreshing ? "rgba(245,158,11,0.15)" : "rgba(16,185,129,0.15)",
-                                border: `1px solid ${isRefreshing ? "rgba(245,158,11,0.3)" : "rgba(16,185,129,0.3)"}`,
-                                color: isRefreshing ? "#d97706" : "#059669",
-                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.15em] shadow-[0_0_12px_rgba(16,185,129,0.06)]"
+                            style={
+                                isRefreshing
+                                    ? {
+                                        background: "rgba(245,158,11,0.08)",
+                                        border: "1px solid rgba(245,158,11,0.25)",
+                                        color: "#d97706",
+                                    }
+                                    : {
+                                        background: "rgba(16,185,129,0.08)",
+                                        border: "1px solid rgba(16,185,129,0.25)",
+                                        color: "#059669",
+                                    }
+                            }
                         >
-                            <div className={`w-1.5 h-1.5 rounded-full ${isRefreshing ? "bg-amber-500" : "bg-emerald-500 animate-pulse"}`} />
+                            <div className="relative flex h-2 w-2 items-center justify-center">
+                                <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
+                                    isRefreshing ? "bg-amber-500" : "bg-emerald-500"
+                                }`} />
+                                <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${
+                                    isRefreshing ? "bg-amber-500" : "bg-emerald-500"
+                                }`} />
+                            </div>
                             {isRefreshing ? "Syncing..." : "Live"}
                         </div>
                     </div>
