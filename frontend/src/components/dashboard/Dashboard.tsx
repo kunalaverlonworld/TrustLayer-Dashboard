@@ -5,6 +5,7 @@ import {
     TrustExplainResponse,
 } from "../../types/types";
 import SummaryCards from "./SummaryCards";
+import DashboardInsights from "./DashboardInsights";
 import { useSearch } from "../../context/SearchContext";
 import {
     Users, ShieldCheck, ShieldAlert, AlertTriangle,
@@ -269,6 +270,9 @@ const Dashboard: React.FC = () => {
 
             {/* ─── Summary Cards ────────────────────────────── */}
             <SummaryCards data={sortedData} />
+
+            {/* ─── AI Insights & Visualizations ────────────── */}
+            <DashboardInsights data={sortedData} onAnalyzeCandidate={handleViewDetails} />
 
             {/* ─── Filters row ──────────────────────────────── */}
             <div className="flex items-center justify-between mb-4 gap-3">
