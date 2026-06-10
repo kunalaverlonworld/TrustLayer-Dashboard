@@ -37,7 +37,8 @@ export default function Sidebar() {
         localStorage.removeItem("plan");
         localStorage.removeItem("licenseId");
         localStorage.removeItem("user");
-        navigate("/");
+        const landingUrl = import.meta.env.VITE_LANDING_URL || "https://trustlayer-by3p.onrender.com";
+        window.location.href = `${landingUrl}?loggedOut=1`;
     };
 
     const planLabel = (localStorage.getItem("plan") || "Basic").toUpperCase();

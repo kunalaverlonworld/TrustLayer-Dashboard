@@ -81,7 +81,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.removeItem("plan");
         localStorage.removeItem("licenseId");
         setUser(null);
-        window.location.href = "/login";
+        // Redirect to landing page and signal it to clear its own session
+        const landingUrl = import.meta.env.VITE_LANDING_URL || "https://trustlayer-by3p.onrender.com";
+        window.location.href = `${landingUrl}?loggedOut=1`;
     };
 
     useEffect(() => {
