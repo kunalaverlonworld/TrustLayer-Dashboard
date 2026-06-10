@@ -26,17 +26,9 @@ const AppRouter: React.FC = () => {
                 <Route element={<ProtectedRoute />}>
                     <Route element={<DashboardLayout />}>
                         <Route path="/dashboard" element={<Dashboard />} />
-
-                        {/* HR Feedback available to Starter and above */}
-                        <Route element={<PlanProtectedRoute allowedPlans={["starter", "professional", "pro", "business", "enterprise"]} />}>
-                            <Route path="/dashboard/hr-feedback" element={<HrFeedbackPage />} />
-                        </Route>
-
-                        {/* Employees page available to Pro, Business, Enterprise */}
-                        <Route element={<PlanProtectedRoute allowedPlans={["professional", "pro", "business", "enterprise"]} />}>
-                            <Route path="/dashboard/employees" element={<EmployeesPage />} />
-                            <Route path="/employees/profile/:employeeId" element={<EmployeeProfilePage />} />
-                        </Route>
+                        <Route path="/dashboard/hr-feedback" element={<HrFeedbackPage />} />
+                        <Route path="/dashboard/employees" element={<EmployeesPage />} />
+                        <Route path="/employees/profile/:employeeId" element={<EmployeeProfilePage />} />
                     </Route>
                 </Route>
 

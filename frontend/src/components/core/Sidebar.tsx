@@ -19,24 +19,18 @@ export default function Sidebar() {
             path: "/dashboard",
             label: "Dashboard",
         },
-    ];
-
-    if (plan !== "basic" && plan !== "free") {
-        menu.push({
+        {
             icon: <ClipboardCheck size={18} />,
             path: "/dashboard/hr-feedback",
             label: "HR Feedback",
             badge: "New",
-        });
-    }
-
-    if (plan !== "basic" && plan !== "free" && plan !== "starter") {
-        menu.push({
+        },
+        {
             icon: <Users size={18} />,
             path: "/dashboard/employees",
             label: "Employees",
-        });
-    }
+        },
+    ];
 
     const logout = () => {
         localStorage.removeItem("token");
