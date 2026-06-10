@@ -62,6 +62,9 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
                 name: item.candidate?.name || "Unknown",
                 email: item.candidate?.email || "",
                 subtitle: item.candidate?.jobTitle || "Candidate",
+                department: item.candidate?.department || "",
+                location: item.candidate?.location || "",
+                riskLevel: item.riskLevel || "",
                 type: "candidate" as const
             }));
 
@@ -70,6 +73,9 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
                 name: item.name || "Unknown",
                 email: item.email || "",
                 subtitle: item.designation || item.department || "Employee",
+                department: item.department || "",
+                location: item.location || "",
+                riskLevel: "",
                 type: "employee" as const
             }));
 
@@ -106,7 +112,10 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
             item =>
                 item.name.toLowerCase().includes(query) ||
                 item.email.toLowerCase().includes(query) ||
-                item.subtitle.toLowerCase().includes(query)
+                item.subtitle.toLowerCase().includes(query) ||
+                item.department.toLowerCase().includes(query) ||
+                item.location.toLowerCase().includes(query) ||
+                item.riskLevel.toLowerCase().includes(query)
         ).slice(0, 5);
     }, [searchQuery, suggestions]);
 
@@ -264,7 +273,12 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
                                                 </div>
                                                 <div className="min-w-0">
                                                     <div className="text-xs font-bold text-slate-800 truncate">{item.name}</div>
-                                                    <div className="text-[10px] text-slate-400 truncate">{item.subtitle} • {item.email}</div>
+                                                    <div className="text-[10px] text-slate-400 truncate">
+                                                        {item.subtitle}
+                                                        {item.department && ` • ${item.department}`}
+                                                        {item.location && ` • ${item.location}`}
+                                                        {item.riskLevel && ` • ${item.riskLevel} Risk`}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </button>
