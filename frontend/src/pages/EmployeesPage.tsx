@@ -216,7 +216,8 @@ const EmployeesPage: React.FC = () => {
                     boxShadow: "0 4px 24px rgba(10, 31, 61, 0.04)",
                 }}
             >
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
                     <thead>
                         <tr
                             style={{
@@ -318,6 +319,7 @@ const EmployeesPage: React.FC = () => {
                         )}
                     </tbody>
                 </table>
+                </div>
             </div>
 
             {/* Modal remains same except button improved */}

@@ -17,18 +17,24 @@ body {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(10, 31, 61, 0.01);
+  border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.25);
+  background: rgba(0, 184, 212, 0.25);
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.4);
+  background: rgba(0, 184, 212, 0.45);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 184, 212, 0.25) rgba(10, 31, 61, 0.01);
 }
 
 /* Smooth table row hover */
