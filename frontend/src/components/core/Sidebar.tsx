@@ -4,12 +4,18 @@ import {
     LayoutDashboard,
     ClipboardCheck,
     Users,
+    UserCheck,
     LogOut,
     ShieldCheck,
     ChevronRight,
 } from "lucide-react";
 
-export default function Sidebar() {
+interface SidebarProps {
+    isOpen?: boolean;
+    onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const plan = localStorage.getItem("plan")?.toLowerCase() ?? "basic";
     const navigate = useNavigate();
 
@@ -18,6 +24,11 @@ export default function Sidebar() {
             icon: <LayoutDashboard size={18} />,
             path: "/dashboard",
             label: "Dashboard",
+        },
+        {
+            icon: <UserCheck size={18} />,
+            path: "/dashboard/candidates",
+            label: "Candidates",
         },
         {
             icon: <ClipboardCheck size={18} />,
@@ -53,7 +64,9 @@ export default function Sidebar() {
 
     return (
         <aside
-            className="fixed top-0 left-0 h-full w-64 flex flex-col z-50 bg-white"
+            className={`fixed top-0 left-0 h-full w-64 flex flex-col z-50 bg-white transition-transform duration-300 lg:translate-x-0 ${
+                isOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
             style={{
                 borderRight: "1px solid #e2eaf3",
                 boxShadow: "0 0 24px rgba(10,31,61,0.04)",
@@ -109,6 +122,7 @@ export default function Sidebar() {
                         key={index}
                         to={item.path}
                         end={item.path === "/dashboard"}
+                        onClick={onClose}
                         className={({ isActive }) =>
                             `group flex items-center justify-between px-4 py-3 rounded-2xl font-semibold text-sm transition-all duration-200 ${
                                 isActive

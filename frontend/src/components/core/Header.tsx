@@ -1,6 +1,6 @@
 // src/components/core/Header.tsx
 import React, { useState, useRef, useEffect } from "react";
-import { Bell, Search, X, User, CreditCard, LogOut, ChevronDown, Settings } from "lucide-react";
+import { Bell, Search, X, User, CreditCard, LogOut, ChevronDown, Settings, Menu } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { useSearch } from "../../context/SearchContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -29,7 +29,11 @@ function getAvatarGradient(name?: string): string {
     return gradients[index];
 }
 
-export default function Header() {
+interface HeaderProps {
+    onToggleSidebar?: () => void;
+}
+
+export default function Header({ onToggleSidebar }: HeaderProps) {
     const { user, logout } = useAuth();
     const { searchQuery, setSearchQuery } = useSearch();
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -84,17 +88,27 @@ export default function Header() {
                 boxShadow: "0 4px 30px rgba(10, 31, 61, 0.03)",
             }}
         >
-            <div className="h-16 px-8 lg:px-10 flex items-center justify-between gap-4">
+            <div className="h-16 px-4 md:px-8 lg:px-10 flex items-center justify-between gap-4">
 
-                {/* Left: Page context */}
-                <div className="flex flex-col">
-                    <span className="text-[#0a1f3d] font-bold text-sm tracking-tight hidden md:block">
-                        Welcome back,{"  "}
-                        <span className="text-[#00b8d4]">{user?.name || "User"}</span>
-                    </span>
-                    <span className="text-xs text-slate-500 font-medium hidden md:block">
-                        {timeString}
-                    </span>
+                {/* Left: Mobile Toggle + Page context */}
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={onToggleSidebar}
+                        className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0"
+                        title="Open menu"
+                    >
+                        <Menu className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="flex flex-col">
+                        <span className="text-[#0a1f3d] font-bold text-sm tracking-tight hidden md:block">
+                            Welcome back,{"  "}
+                            <span className="text-[#00b8d4]">{user?.name || "User"}</span>
+                        </span>
+                        <span className="text-xs text-slate-500 font-medium hidden md:block">
+                            {timeString}
+                        </span>
+                    </div>
                 </div>
 
                 {/* Center: Search */}

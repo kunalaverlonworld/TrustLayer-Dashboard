@@ -148,7 +148,7 @@ const EmployeesPage: React.FC = () => {
     };
 
     return (
-        <div className="ml-5">
+        <div className="min-w-0">
             <style>{`
                 .tl-input {
                     width: 100%;
@@ -191,7 +191,7 @@ const EmployeesPage: React.FC = () => {
                 </p>
             </motion.div>
 
-            <div className="mt-8 flex justify-between items-center">
+            <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="text-xs font-bold text-slate-500 uppercase tracking-wide">
                     Total Employees: <span className="text-slate-800 font-black">{filteredEmployees.length}</span>{searchQuery.trim() ? ` (filtered from ${employees.length})` : ''}
                 </div>
@@ -216,8 +216,8 @@ const EmployeesPage: React.FC = () => {
                     boxShadow: "0 4px 24px rgba(10, 31, 61, 0.04)",
                 }}
             >
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-sm min-w-[700px]">
                     <thead>
                         <tr
                             style={{

@@ -73,10 +73,7 @@ const SummaryCards: React.FC<Props> = ({ data }) => {
             {cards.map((c, idx) => (
                 <div
                     key={c.title}
-                    className="flex-1 flex items-center gap-4 px-6 py-4 transition-all duration-200 hover:bg-slate-50/50 cursor-default"
-                    style={{
-                        borderRight: idx < cards.length - 1 ? "1px solid #f1f5f9" : "none",
-                    }}
+                    className="flex-1 flex items-center gap-4 px-6 py-4 transition-all duration-200 hover:bg-slate-50/50 cursor-default border-b md:border-b-0 md:border-r last:border-b-0 last:border-r-0 border-slate-100"
                 >
                     {/* Icon */}
                     <div

@@ -1,18 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { API } from "../../api/api";
+import { API } from "../api/api";
 import {
     TrustLayerDashboardItem,
     TrustExplainResponse,
-} from "../../types/types";
-import DashboardInsights from "./DashboardInsights";
-import SummaryCards from "./SummaryCards";
+} from "../types/types";
+import { useSearch } from "../context/SearchContext";
 import { motion } from "framer-motion";
 import {
     Users, ShieldCheck, ShieldAlert, AlertTriangle,
     Check, X, ClipboardList, Sparkles, BarChart3,
     AlertCircle, Activity, Eye, MousePointer,
-    Zap, ArrowUpRight, RefreshCw,
+    Zap, Filter, RefreshCw,
 } from "lucide-react";
 
 // ----------------------------------
@@ -54,8 +52,8 @@ function CandidateAvatar({ name }: { name: string }) {
     );
 }
 
-const Dashboard: React.FC = () => {
-    const navigate = useNavigate();
+const CandidatesPage: React.FC = () => {
+    const { searchQuery } = useSearch();
     const [data, setData] = useState<TrustLayerDashboardItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -65,6 +63,7 @@ const Dashboard: React.FC = () => {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [details, setDetails] = useState<TrustExplainResponse | null>(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
+    const [filterRisk, setFilterRisk] = useState<string>("all");
 
     // -----------------------------
     // Fetch Dashboard Data
@@ -78,7 +77,7 @@ const Dashboard: React.FC = () => {
             setLastUpdated(new Date());
             setError(null);
         } catch (err: any) {
-            console.error("[Dashboard] fetchData error:", err);
+            console.error("[CandidatesPage] fetchData error:", err);
 
             if (!silent) {
                 const backendMsg = err?.response?.data?.error || err?.response?.data?.message;
@@ -91,7 +90,7 @@ const Dashboard: React.FC = () => {
                 } else if (err?.isNetworkError) {
                     setError("Cannot reach the server. Please check your connection.");
                 } else {
-                    setError(backendMsg || "Failed to load dashboard data. Please try again.");
+                    setError(backendMsg || "Failed to load candidate data. Please try again.");
                 }
             }
         } finally {
@@ -107,13 +106,27 @@ const Dashboard: React.FC = () => {
     }, []);
 
     // -----------------------------
-    // Top Candidates Slicing
+    // Filter & Sort
     // -----------------------------
-    const topCandidates = useMemo(() => {
-        return [...data]
-            .sort((a, b) => b.finalTrustScore - a.finalTrustScore)
-            .slice(0, 5);
-    }, [data]);
+    const sortedData = useMemo(() => {
+        let filtered = [...data];
+
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(
+                (item) =>
+                    item.candidate?.name?.toLowerCase().includes(query) ||
+                    item.candidate?.email?.toLowerCase().includes(query) ||
+                    item.candidate?.jobTitle?.toLowerCase().includes(query)
+            );
+        }
+
+        if (filterRisk !== "all") {
+            filtered = filtered.filter(item => item.riskLevel === filterRisk);
+        }
+
+        return filtered.sort((a, b) => b.finalTrustScore - a.finalTrustScore);
+    }, [data, searchQuery, filterRisk]);
 
     // -----------------------------
     // Fetch Trust Explanation
@@ -162,8 +175,8 @@ const Dashboard: React.FC = () => {
                     <div className="absolute -top-1 -right-1 w-5 h-5 border-2 border-slate-200 border-t-[#00b8d4] rounded-full animate-spin" />
                 </div>
                 <div className="text-center">
-                    <p className="font-bold text-slate-800 text-sm">Loading Trust Analytics</p>
-                    <p className="text-slate-500 text-xs mt-1">Fetching dashboard insights...</p>
+                    <p className="font-bold text-slate-800 text-sm">Loading Candidate Trust Scores</p>
+                    <p className="text-slate-500 text-xs mt-1">Fetching records...</p>
                 </div>
             </div>
         );
@@ -178,7 +191,7 @@ const Dashboard: React.FC = () => {
                     <ShieldAlert className="w-8 h-8 text-rose-500" />
                 </div>
                 <div className="text-center">
-                    <p className="font-bold text-slate-800">Failed to Load Dashboard</p>
+                    <p className="font-bold text-slate-800">Failed to Load Candidates</p>
                     <p className="text-rose-600 text-sm mt-1">{error}</p>
                 </div>
                 <button
@@ -252,10 +265,10 @@ const Dashboard: React.FC = () => {
                         </div>
                     </div>
                     <h1 className="text-2xl font-black text-slate-800 tracking-tight">
-                        AI Trust Dashboard
+                        Candidates Directory
                     </h1>
                     <p className="text-slate-500 text-sm mt-1 font-medium">
-                        Monitor aggregated company health, risk distributions, and real-time reliability signals.
+                        View, search, filter and analyze applicants tracked by the AI trust monitoring system.
                     </p>
                 </div>
 
@@ -278,181 +291,269 @@ const Dashboard: React.FC = () => {
                 </div>
             </motion.div>
 
-            {/* ─── Summary Metric Cards Row ─────────────────── */}
-            <motion.div variants={itemVariants}>
-                <SummaryCards data={data} />
+            {/* ─── Filters row ──────────────────────────────── */}
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5 mr-1">
+                        <Filter className="w-3.5 h-3.5" />
+                        Filter by risk
+                    </span>
+                    {(["all", "High", "Moderate", "Low"] as const).map(opt => (
+                        <button
+                            key={opt}
+                            onClick={() => setFilterRisk(opt)}
+                            className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200"
+                            style={
+                                filterRisk === opt
+                                    ? {
+                                        background: opt === "all"
+                                            ? "linear-gradient(135deg, #00b8d4, #1565c0)"
+                                            : opt === "High"
+                                            ? "linear-gradient(135deg, #ef4444, #b91c1c)"
+                                            : opt === "Moderate"
+                                            ? "linear-gradient(135deg, #f59e0b, #d97706)"
+                                            : "linear-gradient(135deg, #10b981, #059669)",
+                                        color: "#fff",
+                                        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                                    }
+                                    : {
+                                        background: "#fff",
+                                        border: "1px solid #e2eaf3",
+                                        color: "#475569",
+                                    }
+                            }
+                        >
+                            {opt === "all" ? "All" : opt}
+                            {opt !== "all" && (
+                                <span className="ml-1 opacity-70">
+                                    ({data.filter(d => d.riskLevel === opt).length})
+                                </span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+                <span className="text-xs text-slate-500 font-medium">
+                    Showing <span className="font-bold text-[#00b8d4]">{sortedData.length}</span> results
+                </span>
             </motion.div>
 
-            {/* ─── AI Insights & Visualizations ────────────── */}
-            <motion.div variants={itemVariants}>
-                <DashboardInsights data={data} onAnalyzeCandidate={handleViewDetails} />
-            </motion.div>
+            {/* ─── Empty State ──────────────────────────────── */}
+            {!sortedData.length ? (
+                <div
+                    className="rounded-2xl p-16 text-center"
+                    style={{
+                        background: "#fff",
+                        border: "1px solid #e2eaf3",
+                        boxShadow: "0 4px 24px rgba(10,31,61,0.04)",
+                    }}
+                >
+                    <div
+                        className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                        style={{ background: "rgba(0,184,212,0.15)" }}
+                    >
+                        <Users className="w-7 h-7 text-[#00b8d4]" />
+                    </div>
+                    <h3 className="text-base font-bold text-slate-800 mb-2">No candidates found</h3>
+                    <p className="text-slate-500 text-sm max-w-xs mx-auto">
+                        {searchQuery ? `No results for "${searchQuery}". Try a different search.` : "No candidates match the selected filter."}
+                    </p>
+                </div>
+            ) : (
 
-            {/* ─── Top Candidates glance ────────────────────── */}
+            /* ─── Data Table ────────────────────────────────── */
             <motion.div
                 variants={itemVariants}
-                className="rounded-2xl overflow-hidden bg-white mt-8"
+                className="rounded-2xl overflow-hidden bg-white"
                 style={{
                     border: "1px solid #e2eaf3",
                     boxShadow: "0 4px 24px rgba(10, 31, 61, 0.04)",
                 }}
             >
-                {/* Section Header */}
-                <div className="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
-                    <div>
-                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-[#00b8d4]" />
-                            Top Reliable Applicants
-                        </h3>
-                        <p className="text-xs text-slate-500 font-medium mt-1">
-                            Applicants currently holding the highest predictive reliability scores.
-                        </p>
-                    </div>
-                    <button
-                        onClick={() => navigate("/dashboard/candidates")}
-                        className="flex items-center gap-1 text-xs font-bold text-[#00b8d4] hover:text-[#0097b2] transition-colors self-start sm:self-center"
-                    >
-                        View Candidates Directory <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                </div>
+                <div className="overflow-auto custom-scrollbar">
+                    <table className="w-full text-sm min-w-[780px]">
+                        <thead>
+                            <tr style={{ background: "#f8fafc" }}>
+                                {["Candidate", "Role & Pipeline", "Activity", "Trust Score", "Risk Level", "Actions"].map(col => (
+                                    <th
+                                        key={col}
+                                        className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-500 sticky top-0 bg-[#f8fafc] z-10"
+                                        style={{ 
+                                            textAlign: col === "Actions" ? "center" : "left",
+                                            borderBottom: "1px solid #e2eaf3",
+                                        }}
+                                    >
+                                        {col}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
 
-                {/* Table Data */}
-                {!topCandidates.length ? (
-                    <div className="p-10 text-center text-slate-500 font-semibold text-sm">
-                        No candidate records available
-                    </div>
-                ) : (
-                    <div className="overflow-auto custom-scrollbar">
-                        <table className="w-full text-sm min-w-[700px]">
-                            <thead>
-                                <tr style={{ background: "#f8fafc" }}>
-                                    {["Candidate", "Role & Pipeline", "Trust Score", "Risk Level", "Action"].map(col => (
-                                        <th
-                                            key={col}
-                                            className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-[0.1em] text-slate-500"
-                                            style={{
-                                                borderBottom: "1px solid #e2eaf3",
-                                                textAlign: col === "Action" ? "center" : "left"
-                                            }}
-                                        >
-                                            {col}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {topCandidates.map((item, idx) => {
-                                    const riskStyle = getRiskStyle(item.riskLevel);
-                                    const score = item.finalTrustScore ?? 0;
-                                    return (
-                                        <tr
-                                            key={item.applicationId}
-                                            className="group transition-all duration-150"
-                                            style={{
-                                                borderBottom: idx < topCandidates.length - 1
-                                                    ? "1px solid #e2eaf3"
-                                                    : "none",
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.background = "rgba(0,184,212,0.04)";
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.background = "transparent";
-                                            }}
-                                        >
-                                            <td className="px-5 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <CandidateAvatar name={item.candidate?.name || "Unknown"} />
-                                                    <div>
-                                                        <div className="font-bold text-slate-800 text-sm">
-                                                            {item.candidate?.name || "Unknown"}
-                                                        </div>
-                                                        <div className="text-xs text-slate-500 font-medium mt-0.5">
-                                                            {item.candidate?.email || "—"}
-                                                        </div>
+                        <tbody>
+                            {sortedData.map((item, idx) => {
+                                const riskStyle = getRiskStyle(item.riskLevel);
+                                const score = item.finalTrustScore ?? 0;
+                                return (
+                                    <tr
+                                        key={item.applicationId}
+                                        className="group transition-all duration-150"
+                                        style={{
+                                            borderBottom: idx < sortedData.length - 1
+                                                ? "1px solid #e2eaf3"
+                                                : "none",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = "rgba(0,184,212,0.04)";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = "transparent";
+                                        }}
+                                    >
+                                        {/* Candidate */}
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <CandidateAvatar name={item.candidate?.name || "Unknown"} />
+                                                <div>
+                                                    <div className="font-bold text-slate-800 text-sm">
+                                                        {item.candidate?.name || "Unknown"}
+                                                    </div>
+                                                    <div className="text-xs text-slate-500 font-medium mt-0.5">
+                                                        {item.candidate?.email || "—"}
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td className="px-5 py-4">
-                                                <div className="font-semibold text-slate-800 text-sm">
-                                                    {item.candidate?.jobTitle || "—"}
-                                                </div>
-                                                <div className="flex items-center gap-1.5 mt-1">
-                                                    <span className="text-xs text-slate-500 font-medium">
-                                                        {item.candidate?.department || "—"}
-                                                    </span>
-                                                    <span className="text-slate-300">•</span>
-                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                                                        style={{
-                                                            background: "rgba(0,184,212,0.15)",
-                                                            color: "#00b8d4",
-                                                            border: "1px solid rgba(0,184,212,0.25)",
-                                                        }}
-                                                    >
-                                                        {item.candidate?.stage || "—"}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-5 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-black text-base" style={{ color: getTrustScoreColor(score) }}>
-                                                        {score.toFixed(1)}%
-                                                    </span>
-                                                </div>
-                                                <div className="w-24 h-1.5 bg-slate-200 rounded-full mt-2 overflow-hidden">
-                                                    <div
-                                                        className="h-full rounded-full transition-all duration-500"
-                                                        style={{
-                                                            width: `${Math.min(score, 100)}%`,
-                                                            background: getTrustScoreGradient(score),
-                                                        }}
-                                                    />
-                                                </div>
-                                            </td>
-                                            <td className="px-5 py-4">
-                                                <span
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
-                                                    style={{
-                                                        background: riskStyle.bg,
-                                                        color: riskStyle.text,
-                                                        border: `1px solid ${riskStyle.border}`,
-                                                    }}
-                                                >
-                                                    {getRiskIcon(item.riskLevel)}
-                                                    {item.riskLevel}
+                                            </div>
+                                        </td>
+
+                                        {/* Role & Pipeline */}
+                                        <td className="px-5 py-4">
+                                            <div className="font-semibold text-slate-800 text-sm">
+                                                {item.candidate?.jobTitle || "—"}
+                                            </div>
+                                            <div className="flex items-center gap-1.5 mt-1">
+                                                <span className="text-xs text-slate-500 font-medium">
+                                                    {item.candidate?.department || "—"}
                                                 </span>
-                                            </td>
-                                            <td className="px-5 py-4 text-center">
-                                                <button
-                                                    onClick={() => handleViewDetails(item.applicationId)}
-                                                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-700 hover:text-white rounded-xl transition-all duration-200 hover:-translate-y-0.5"
+                                                <span className="text-slate-300">•</span>
+                                                <span
+                                                    className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                                                     style={{
-                                                        background: "rgba(10,31,61,0.03)",
-                                                        border: "1px solid #e2eaf3",
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                        e.currentTarget.style.background = "linear-gradient(135deg,#00b8d4,#1565c0)";
-                                                        e.currentTarget.style.boxShadow = "0 4px 14px rgba(0,184,212,0.35)";
-                                                        e.currentTarget.style.color = "white";
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        e.currentTarget.style.background = "rgba(10,31,61,0.03)";
-                                                        e.currentTarget.style.boxShadow = "none";
-                                                        e.currentTarget.style.color = "#334155";
+                                                        background: "rgba(0,184,212,0.15)",
+                                                        color: "#00b8d4",
+                                                        border: "1px solid rgba(0,184,212,0.25)",
                                                     }}
                                                 >
-                                                    <BarChart3 className="w-3.5 h-3.5" />
-                                                    Analyze
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                                    {item.candidate?.stage || "—"}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        {/* Activity */}
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                                                    <Eye className="w-3.5 h-3.5 text-slate-400" />
+                                                    <span className="font-bold text-slate-800">{item.totalOpens ?? 0}</span>
+                                                    <span className="text-slate-400">opens</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                                                    <MousePointer className="w-3.5 h-3.5 text-slate-400" />
+                                                    <span className="font-bold text-slate-800">{item.totalClicks ?? 0}</span>
+                                                    <span className="text-slate-400">clicks</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-500">
+                                                <Activity className="w-3 h-3" />
+                                                {item.totalInteractions ?? 0} total events
+                                            </div>
+                                        </td>
+
+                                        {/* Trust Score */}
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-2">
+                                                <span
+                                                    className="font-black text-base"
+                                                    style={{ color: getTrustScoreColor(score) }}
+                                                >
+                                                    {score.toFixed(1)}%
+                                                </span>
+                                            </div>
+                                            <div className="w-24 h-1.5 bg-slate-200 rounded-full mt-2 overflow-hidden">
+                                                <div
+                                                    className="h-full rounded-full transition-all duration-500"
+                                                    style={{
+                                                        width: `${Math.min(score, 100)}%`,
+                                                        background: getTrustScoreGradient(score),
+                                                    }}
+                                                />
+                                            </div>
+                                        </td>
+
+                                        {/* Risk Level */}
+                                        <td className="px-5 py-4">
+                                            <span
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                                                style={{
+                                                    background: riskStyle.bg,
+                                                    color: riskStyle.text,
+                                                    border: `1px solid ${riskStyle.border}`,
+                                                }}
+                                            >
+                                                <span style={{ color: riskStyle.text }}>
+                                                    {getRiskIcon(item.riskLevel)}
+                                                </span>
+                                                {item.riskLevel}
+                                            </span>
+                                        </td>
+
+                                        {/* Actions */}
+                                        <td className="px-5 py-4 text-center">
+                                            <button
+                                                onClick={() => handleViewDetails(item.applicationId)}
+                                                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-700 hover:text-white rounded-xl transition-all duration-200 hover:-translate-y-0.5"
+                                                style={{
+                                                    background: "rgba(10,31,61,0.03)",
+                                                    border: "1px solid #e2eaf3",
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.background = "linear-gradient(135deg,#00b8d4,#1565c0)";
+                                                    e.currentTarget.style.boxShadow = "0 4px 14px rgba(0,184,212,0.35)";
+                                                    e.currentTarget.style.color = "white";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.background = "rgba(10,31,61,0.03)";
+                                                    e.currentTarget.style.boxShadow = "none";
+                                                    e.currentTarget.style.color = "#334155";
+                                                }}
+                                            >
+                                                <BarChart3 className="w-3.5 h-3.5" />
+                                                Analyze
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Table footer */}
+                <div
+                    className="px-5 py-3 flex items-center justify-between"
+                    style={{
+                        borderTop: "1px solid #e2eaf3",
+                        background: "#f8fafc",
+                    }}
+                >
+                    <span className="text-[10px] text-slate-500 font-medium">
+                        {sortedData.length} candidate{sortedData.length !== 1 ? "s" : ""} • Auto-refreshes every 30s
+                    </span>
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#00b8d4] font-bold">
+                        <Zap className="w-3 h-3" />
+                        AI Powered
                     </div>
-                )}
+                </div>
             </motion.div>
+
+            )}
 
             {/* ─── Trust Explanation Modal ──────────────────── */}
             {selectedId && (
@@ -474,11 +575,13 @@ const Dashboard: React.FC = () => {
                             boxShadow: "0 24px 64px rgba(10, 31, 61, 0.15)",
                         }}
                     >
+                        {/* Color top bar */}
                         <div
                             className="h-1"
                             style={{ background: "linear-gradient(90deg, #00b8d4, #1565c0, #7c3aed)" }}
                         />
 
+                        {/* Header */}
                         <div
                             className="flex items-center justify-between px-7 py-5"
                             style={{ borderBottom: "1px solid #e2eaf3" }}
@@ -506,6 +609,7 @@ const Dashboard: React.FC = () => {
                             </button>
                         </div>
 
+                        {/* Body */}
                         <div className="px-7 py-6 max-h-[70vh] overflow-y-auto space-y-5">
                             {detailsLoading ? (
                                 <div className="flex flex-col justify-center items-center py-12 gap-4">
@@ -514,6 +618,7 @@ const Dashboard: React.FC = () => {
                                 </div>
                             ) : details ? (
                                 <>
+                                    {/* Overall Score */}
                                     <div
                                         className="rounded-2xl p-5"
                                         style={{
@@ -541,8 +646,13 @@ const Dashboard: React.FC = () => {
                                                 }}
                                             />
                                         </div>
+                                        <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-medium">
+                                            <span>Low Trust</span>
+                                            <span>High Trust</span>
+                                        </div>
                                     </div>
 
+                                    {/* Components */}
                                     <div>
                                         <h3 className="text-xs font-black uppercase tracking-[0.1em] text-slate-700 mb-3 flex items-center gap-2">
                                             <BarChart3 className="w-3.5 h-3.5 text-[#00b8d4]" />
@@ -609,7 +719,7 @@ const Dashboard: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Metrics Grid */}
+                                    {/* Metrics grid */}
                                     <div className="grid grid-cols-3 gap-3">
                                         {[
                                             { label: "Total Opens", value: details.components?.interaction?.openCountTotal ?? 0, icon: <Eye className="w-4 h-4" />, color: "#00b8d4" },
@@ -675,4 +785,4 @@ const Dashboard: React.FC = () => {
     );
 };
 
-export default Dashboard;
+export default CandidatesPage;

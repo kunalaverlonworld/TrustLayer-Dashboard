@@ -10,6 +10,7 @@ import ProtectedRoute from "../components/auth/ProtectedRoute";
 import PlanProtectedRoute from "../components/auth/PlanProtectedRoute";
 import EmployeesPage from "../pages/EmployeesPage";
 import EmployeeProfilePage from "../pages/EmployeeProfilePage";
+import CandidatesPage from "../pages/CandidatesPage";
 
 const AppRouter: React.FC = () => {
     return (
@@ -26,6 +27,7 @@ const AppRouter: React.FC = () => {
                 <Route element={<ProtectedRoute />}>
                     <Route element={<DashboardLayout />}>
                         <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/dashboard/candidates" element={<CandidatesPage />} />
                         <Route path="/dashboard/hr-feedback" element={<HrFeedbackPage />} />
                         <Route path="/dashboard/employees" element={<EmployeesPage />} />
                         <Route path="/employees/profile/:employeeId" element={<EmployeeProfilePage />} />
