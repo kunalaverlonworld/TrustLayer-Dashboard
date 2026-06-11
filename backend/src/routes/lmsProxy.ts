@@ -58,19 +58,73 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 // ── POST /api/lms/register ────────────────────────────────────────────────────
-// Body: { name, email, password, source? }
+// Body: { name, email, password, source?, companyName? }
+// After syncing to LMS, also upsert User + Company in our own MongoDB so the
+// user is immediately visible in the backend DB — not just after their first
+// SSO redirect to the dashboard.
 router.post("/register", async (req: Request, res: Response) => {
   try {
-    const { name, email, password, source } = req.body;
+    const { name, email, password, source, companyName } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: "name, email and password are required" });
     }
+
+    // 1. Sync to LMS first — fail fast if LMS is unavailable
     const { status, data } = await proxyToLMS("POST", "/api/external/customer-sync", {
       name,
       email,
       password,
       source: source || "trustlayer",
     });
+
+    // 2. If LMS accepted the registration, mirror the user in our own DB
+    if (status === 200 || status === 201) {
+      try {
+        const normalizedEmail = email.toLowerCase().trim();
+        const finalCompanyName = (companyName || "").trim() || "Default Company";
+
+        // Find or create the Company record
+        let company = await Company.findOne({ name: finalCompanyName });
+        if (!company) {
+          let codeBase = finalCompanyName.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase();
+          if (!codeBase) codeBase = "COMP";
+          let uniqueCode = codeBase;
+          let counter = 1;
+          while (await Company.findOne({ companyCode: uniqueCode })) {
+            uniqueCode = `${codeBase}_${counter}`;
+            counter++;
+          }
+          company = await Company.create({
+            name: finalCompanyName,
+            companyCode: uniqueCode,
+            subscriptionPlan: "basic",
+          });
+          console.log(`[LMSProxy] Created new company "${finalCompanyName}" (${company._id})`);
+        }
+
+        // Find or create the User record (idempotent — safe to call multiple times)
+        const existingUser = await User.findOne({ email: normalizedEmail });
+        if (!existingUser) {
+          const bcrypt = await import("bcrypt");
+          const passwordHash = await bcrypt.hash(password, 10);
+          await User.create({
+            companyId:    company._id,
+            name:         name,
+            email:        normalizedEmail,
+            role:         "manager",
+            passwordHash,
+            isActive:     true,
+          });
+          console.log(`[LMSProxy] Created backend user for "${normalizedEmail}" under company "${finalCompanyName}"`);
+        } else {
+          console.log(`[LMSProxy] Backend user already exists for "${normalizedEmail}", skipping creation`);
+        }
+      } catch (dbErr: any) {
+        // DB errors are non-fatal — LMS registration succeeded, so still return success
+        console.error("[LMSProxy] Failed to mirror user in backend DB:", dbErr.message);
+      }
+    }
+
     return res.status(status).json(data);
   } catch (err: any) {
     console.error("[LMSProxy] /register error:", err.message);
