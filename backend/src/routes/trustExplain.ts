@@ -97,6 +97,67 @@ router.get("/:applicationId", async (req: Request, res: Response) => {
             );
         }
 
+        // 7.5️⃣ Timeline Generation Layer
+        const timeline: any[] = [];
+        
+        interactions.forEach(interaction => {
+            if (interaction.sentAt) {
+                timeline.push({
+                    title: "Verification Link Sent",
+                    description: "Initial background check and validation link sent to candidate.",
+                    timestamp: interaction.sentAt,
+                    type: "sent"
+                });
+            }
+
+            if (interaction.openCount > 0 && interaction.lastOpenedAt) {
+                timeline.push({
+                    title: "Validation Link Opened",
+                    description: `Candidate loaded validation page (Total: ${interaction.openCount} opens).`,
+                    timestamp: interaction.lastOpenedAt,
+                    type: "open"
+                });
+            }
+
+            if (interaction.clickCount > 0 && interaction.lastClickAt) {
+                timeline.push({
+                    title: "Validation Action Clicked",
+                    description: `Candidate clicked check status or verification trigger (Total: ${interaction.clickCount} clicks).`,
+                    timestamp: interaction.lastClickAt,
+                    type: "click"
+                });
+            }
+
+            if (interaction.hrFeedbackEmailSent) {
+                timeline.push({
+                    title: "HR Reference Emailed",
+                    description: "Verification request sent to candidate's previous employer.",
+                    timestamp: interaction.updatedAt ? new Date(interaction.updatedAt.getTime() - 4 * 3600 * 1000) : new Date(),
+                    type: "email_sent"
+                });
+            }
+
+            if (interaction.isGhosting) {
+                timeline.push({
+                    title: "Ghosting Detected",
+                    description: "Alert: Candidate has gone silent for more than 48 hours.",
+                    timestamp: interaction.updatedAt || new Date(),
+                    type: "ghosting"
+                });
+            }
+        });
+
+        if (hrScore !== null && hr) {
+            timeline.push({
+                title: "Employer Reference Received",
+                description: `Previous employer submitted candidate scores. Final HR Trust Score: ${hrScore}%.`,
+                timestamp: (hr as any).createdAt || new Date(),
+                type: "feedback"
+            });
+        }
+
+        timeline.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
         // 8️⃣ Final Response
         res.json({
             applicationId,
@@ -126,6 +187,7 @@ router.get("/:applicationId", async (req: Request, res: Response) => {
                     : null,
             },
             explanation,
+            timeline,
         });
 
     } catch (error: any) {

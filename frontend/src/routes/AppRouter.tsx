@@ -11,6 +11,7 @@ import PlanProtectedRoute from "../components/auth/PlanProtectedRoute";
 import EmployeesPage from "../pages/EmployeesPage";
 import EmployeeProfilePage from "../pages/EmployeeProfilePage";
 import CandidatesPage from "../pages/CandidatesPage";
+import ShareCandidatePage from "../pages/ShareCandidatePage";
 
 const AppRouter: React.FC = () => {
     return (
@@ -22,6 +23,7 @@ const AppRouter: React.FC = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/sso"   element={<SSOPage />} />    {/* ← SSO auto-login */}
                 <Route path="/hr-feedback/:applicationId" element={<HrFeedbackPage />} />
+                <Route path="/share/candidate/:applicationId" element={<ShareCandidatePage />} />
 
                 {/* Protected Dashboard Routes */}
                 <Route element={<ProtectedRoute />}>

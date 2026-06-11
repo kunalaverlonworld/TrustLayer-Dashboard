@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API } from "../../api/api";
+import { API, sendHrEmail } from "../../api/api";
 import {
     TrustLayerDashboardItem,
     TrustExplainResponse,
@@ -12,7 +12,8 @@ import {
     Users, ShieldCheck, ShieldAlert, AlertTriangle,
     Check, X, ClipboardList, Sparkles, BarChart3,
     AlertCircle, Activity, Eye, MousePointer,
-    Zap, ArrowUpRight, RefreshCw, Mail, Send, Calendar, ChevronDown
+    Zap, ArrowUpRight, RefreshCw, Mail, Send, Calendar, ChevronDown,
+    Share2, Clock, Building2
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -72,6 +73,11 @@ const Dashboard: React.FC = () => {
     const [nudgeText, setNudgeText] = useState("");
     const [sendingNudge, setSendingNudge] = useState(false);
 
+    // Interactive Roadmap States
+    const [checkedPlaybook, setCheckedPlaybook] = useState<Record<string, boolean>>({});
+    const [editedHrContacts, setEditedHrContacts] = useState<Record<string, { name: string; email: string }>>({});
+    const [sendingEmails, setSendingEmails] = useState<Record<string, boolean>>({});
+
     const handleSendNudge = () => {
         setSendingNudge(true);
         setTimeout(() => {
@@ -83,6 +89,35 @@ const Dashboard: React.FC = () => {
 
     const handleCalendarSync = () => {
         toast.success("Priority check-in call scheduled in calendar.");
+    };
+
+    const handleShareReport = () => {
+        const shareUrl = `${window.location.origin}/share/candidate/${selectedId}`;
+        navigator.clipboard.writeText(shareUrl);
+        toast.success("Public report URL copied to clipboard!");
+    };
+
+    const getRiskPlaybookActions = (riskLevel: "Low" | "Moderate" | "High") => {
+        switch (riskLevel) {
+            case "High":
+                return [
+                    "Request additional secondary government-issued ID validation.",
+                    "Schedule manual video-call identity verification.",
+                    "Send secondary reference requests to direct line managers.",
+                    "Flag for internal executive leadership compliance review."
+                ];
+            case "Moderate":
+                return [
+                    "Verify employment dates discrepancy with HR contact.",
+                    "Perform standard social verification check.",
+                    "Request current/most recent manager reference."
+                ];
+            default:
+                return [
+                    "Standard background check automated sign-off.",
+                    "Proceed to standard offer routing checklist."
+                ];
+        }
     };
 
     // -----------------------------
@@ -569,44 +604,131 @@ const Dashboard: React.FC = () => {
                                     <div className="w-10 h-10 border-2 border-slate-200 border-t-[#00b8d4] rounded-full animate-spin" />
                                     <p className="text-slate-500 text-sm font-medium">Analyzing trust signals...</p>
                                 </div>
-                            ) : details ? (
-                                <>
-                                    <div
-                                        className="rounded-2xl p-5"
-                                        style={{
-                                            background: "linear-gradient(135deg, rgba(0,184,212,0.08), rgba(21,101,192,0.08))",
-                                            border: "1px solid rgba(0,184,212,0.2)",
-                                        }}
-                                    >
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="text-xs font-black uppercase tracking-[0.1em] text-slate-500">
-                                                Overall Trustworthiness
-                                            </span>
-                                            <span
-                                                className="text-3xl font-black"
-                                                style={{ color: getTrustScoreColor(details.finalTrustScore) }}
-                                            >
-                                                {details.finalTrustScore.toFixed(1)}%
-                                            </span>
-                                        </div>
-                                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                                            <div
-                                                className="h-full rounded-full transition-all duration-700"
-                                                style={{
-                                                    width: `${details.finalTrustScore}%`,
-                                                    background: getTrustScoreGradient(details.finalTrustScore),
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
+                            ) : details ? ( (() => {
+                                const candidateItem = data.find(d => d.applicationId === selectedId);
+                                const employments = candidateItem?.candidate?.previousEmployments || [];
+                                return (
+                                    <>
+                                        {/* Overall Score */}
+                                        <div
+                                            className="rounded-2xl p-5"
+                                            style={{
+                                                background: "linear-gradient(135deg, rgba(0,184,212,0.08), rgba(21,101,192,0.08))",
+                                                border: "1px solid rgba(0,184,212,0.2)",
+                                            }}
+                                        >
+                                            <div className="flex items-center justify-between mb-3">
+                                                <span className="text-xs font-black uppercase tracking-[0.1em] text-slate-500">
+                                                    Overall Trustworthiness
+                                                </span>
+                                                <span
+                                                    className="text-3xl font-black"
+                                                    style={{ color: getTrustScoreColor(details.finalTrustScore) }}
+                                                >
+                                                    {details.finalTrustScore.toFixed(1)}%
+                                                </span>
+                                            </div>
+                                            <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                                <div
+                                                    className="h-full rounded-full transition-all duration-700"
+                                                    style={{
+                                                        width: `${details.finalTrustScore}%`,
+                                                        background: getTrustScoreGradient(details.finalTrustScore),
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-medium">
+                                                <span>Low Trust</span>
+                                                <span>High Trust</span>
+                                            </div>
 
-                                    <div>
-                                        <h3 className="text-xs font-black uppercase tracking-[0.1em] text-slate-700 mb-3 flex items-center gap-2">
-                                            <BarChart3 className="w-3.5 h-3.5 text-[#00b8d4]" />
-                                            Evaluation Components
-                                        </h3>
-                                        <div className="space-y-3">
-                                            {details.components?.interaction && (
+                                            {/* Share Button Row */}
+                                            <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-100">
+                                                <span className="text-xs text-slate-500 font-medium">Collaboration:</span>
+                                                <button
+                                                    onClick={handleShareReport}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[#00b8d4] hover:bg-[#00b8d4]/10 border border-[#00b8d4]/20 transition-all"
+                                                >
+                                                    <Share2 className="w-3.5 h-3.5" />
+                                                    Copy Public Share Link
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Automated Risk Mitigation Playbooks */}
+                                        <div className="rounded-xl p-4 bg-slate-50 border border-slate-200">
+                                            <h3 className="text-xs font-black uppercase tracking-[0.1em] text-slate-700 mb-2 flex items-center gap-2">
+                                                <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
+                                                Risk Mitigation Playbook ({details.riskLevel} Risk)
+                                            </h3>
+                                            <p className="text-[10px] text-slate-500 mb-3">
+                                                Follow these guidelines to verify discrepancies and secure candidate onboarding:
+                                            </p>
+                                            <div className="space-y-2">
+                                                {getRiskPlaybookActions(details.riskLevel).map((action, actionIdx) => {
+                                                    const itemKey = `${details.applicationId}-${actionIdx}`;
+                                                    const isChecked = !!checkedPlaybook[itemKey];
+                                                    return (
+                                                        <label
+                                                            key={actionIdx}
+                                                            className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-600 select-none"
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isChecked}
+                                                                onChange={() => {
+                                                                    setCheckedPlaybook(prev => ({
+                                                                        ...prev,
+                                                                        [itemKey]: !prev[itemKey]
+                                                                    }));
+                                                                }}
+                                                                className="mt-0.5 rounded border-slate-300 text-[#00b8d4] focus:ring-[#00b8d4] h-3.5 w-3.5"
+                                                            />
+                                                            <span className={isChecked ? "line-through text-slate-400" : ""}>
+                                                                {action}
+                                                            </span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Components */}
+                                        <div>
+                                            <h3 className="text-xs font-black uppercase tracking-[0.1em] text-slate-700 mb-3 flex items-center gap-2">
+                                                <BarChart3 className="w-3.5 h-3.5 text-[#00b8d4]" />
+                                                Evaluation Components
+                                            </h3>
+                                            <div className="space-y-3">
+                                                {details.components?.interaction && (
+                                                    <div
+                                                        className="rounded-xl p-4"
+                                                        style={{
+                                                            background: "rgba(10, 31, 61, 0.02)",
+                                                            border: "1px solid #e2eaf3",
+                                                        }}
+                                                    >
+                                                        <div className="flex justify-between items-center mb-2">
+                                                            <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                                                <Activity className="w-3.5 h-3.5 text-[#00b8d4]" />
+                                                                Candidate Interaction Rate
+                                                            </span>
+                                                            <span className="text-xs font-black text-[#00b8d4]">
+                                                                {(details.components.interaction.averageNormalizedScore ?? 0).toFixed(1)}%
+                                                            </span>
+                                                        </div>
+                                                        <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                                            <div
+                                                                className="h-full rounded-full"
+                                                                style={{
+                                                                    width: `${details.components.interaction.averageNormalizedScore ?? 0}%`,
+                                                                    background: "linear-gradient(90deg, #00b8d4, #0284c7)",
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 <div
                                                     className="rounded-xl p-4"
                                                     style={{
@@ -616,191 +738,337 @@ const Dashboard: React.FC = () => {
                                                 >
                                                     <div className="flex justify-between items-center mb-2">
                                                         <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                                                            <Activity className="w-3.5 h-3.5 text-[#00b8d4]" />
-                                                            Candidate Interaction Rate
+                                                            <ClipboardList className="w-3.5 h-3.5 text-[#1565c0]" />
+                                                            HR Reference Check Score
                                                         </span>
-                                                        <span className="text-xs font-black text-[#00b8d4]">
-                                                            {(details.components.interaction.averageNormalizedScore ?? 0).toFixed(1)}%
+                                                        <span className="text-xs font-black text-[#1565c0]">
+                                                            {details.components?.hrFeedback
+                                                                ? `${details.components.hrFeedback.calculatedHrScore.toFixed(1)}%`
+                                                                : "Pending"}
                                                         </span>
                                                     </div>
                                                     <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
                                                         <div
                                                             className="h-full rounded-full"
                                                             style={{
-                                                                width: `${details.components.interaction.averageNormalizedScore ?? 0}%`,
-                                                                background: "linear-gradient(90deg, #00b8d4, #0284c7)",
+                                                                width: `${details.components?.hrFeedback?.calculatedHrScore ?? 0}%`,
+                                                                background: "linear-gradient(90deg, #1565c0, #7c3aed)",
                                                             }}
                                                         />
                                                     </div>
                                                 </div>
-                                            )}
-
-                                            <div
-                                                className="rounded-xl p-4"
-                                                style={{
-                                                    background: "rgba(10, 31, 61, 0.02)",
-                                                    border: "1px solid #e2eaf3",
-                                                }}
-                                            >
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                                                        <ClipboardList className="w-3.5 h-3.5 text-[#1565c0]" />
-                                                        HR Reference Check Score
-                                                    </span>
-                                                    <span className="text-xs font-black text-[#1565c0]">
-                                                        {details.components?.hrFeedback
-                                                            ? `${details.components.hrFeedback.calculatedHrScore.toFixed(1)}%`
-                                                            : "Pending"}
-                                                    </span>
-                                                </div>
-                                                <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                                                    <div
-                                                        className="h-full rounded-full"
-                                                        style={{
-                                                            width: `${details.components?.hrFeedback?.calculatedHrScore ?? 0}%`,
-                                                            background: "linear-gradient(90deg, #1565c0, #7c3aed)",
-                                                        }}
-                                                    />
-                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* Metrics Grid */}
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {[
-                                            { label: "Total Opens", value: details.components?.interaction?.openCountTotal ?? 0, icon: <Eye className="w-4 h-4" />, color: "#00b8d4" },
-                                            { label: "Total Clicks", value: details.components?.interaction?.clickCountTotal ?? 0, icon: <MousePointer className="w-4 h-4" />, color: "#1565c0" },
-                                            {
-                                                label: "Ghosting",
-                                                value: details.components?.interaction?.ghostingDetected ? "Alert" : "Clean",
-                                                icon: <ShieldCheck className="w-4 h-4" />,
-                                                color: details.components?.interaction?.ghostingDetected ? "#ef4444" : "#10b981",
-                                            },
-                                        ].map(m => (
-                                            <div
-                                                key={m.label}
-                                                className="rounded-xl p-4 text-center"
-                                                style={{
-                                                    background: "rgba(10, 31, 61, 0.02)",
-                                                    border: "1px solid #e2eaf3",
-                                                }}
-                                            >
-                                                <span style={{ color: m.color }} className="flex justify-center mb-2">{m.icon}</span>
-                                                <div className="text-base font-black text-[#0a1f3d]">{m.value}</div>
-                                                <div className="text-[10px] text-slate-500 font-medium mt-0.5">{m.label}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Key Insights */}
-                                    {details.explanation && details.explanation.length > 0 && (
+                                        {/* Reference Check Portal Triggers */}
                                         <div>
                                             <h3 className="text-xs font-black uppercase tracking-[0.1em] text-slate-700 mb-3 flex items-center gap-2">
-                                                <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
-                                                Key Insights & Signals
+                                                <Building2 className="w-3.5 h-3.5 text-[#00b8d4]" />
+                                                Employment Reference Check Triggers
                                             </h3>
-                                            <ul className="space-y-2">
-                                                {details.explanation.map((line, index) => (
-                                                    <li
-                                                        key={index}
-                                                        className="flex items-start gap-3 text-xs text-slate-600 leading-relaxed p-3 rounded-xl"
-                                                        style={{
-                                                            background: "rgba(10, 31, 61, 0.01)",
-                                                            border: "1px solid #e2eaf3",
-                                                        }}
-                                                    >
-                                                        <div
-                                                            className="w-4 h-4 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                                                            style={{ background: "rgba(0,184,212,0.15)" }}
-                                                        >
-                                                            <Check className="w-2.5 h-2.5 text-[#00b8d4]" />
-                                                        </div>
-                                                        <span>{line}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
+                                            {employments.length === 0 ? (
+                                                <p className="text-slate-500 text-xs italic">No previous employment records listed for reference checking.</p>
+                                            ) : (
+                                                <div className="space-y-3">
+                                                    {employments.map((emp, empIdx) => {
+                                                        const contactKey = `${selectedId}-${empIdx}`;
+                                                        const hrName = editedHrContacts[contactKey]?.name ?? emp.hrName;
+                                                        const hrEmail = editedHrContacts[contactKey]?.email ?? emp.hrEmail;
+                                                        const isSending = !!sendingEmails[contactKey];
 
-                                    {/* AI Action Center */}
-                                    <div
-                                        className="rounded-2xl p-5 mt-4"
-                                        style={{
-                                            background: "rgba(124, 58, 237, 0.04)",
-                                            border: "1px solid rgba(124, 58, 237, 0.15)",
-                                        }}
-                                    >
-                                        <h3 className="text-xs font-black uppercase tracking-[0.1em] text-[#7c3aed] mb-3 flex items-center gap-2">
-                                            <Zap className="w-3.5 h-3.5 text-[#7c3aed]" />
-                                            AI Action Center
-                                        </h3>
-                                        <p className="text-[11px] text-slate-500 font-medium mb-4">
-                                            Predictive AI recommendations to mitigate candidate drop-off & ghosting.
-                                        </p>
-                                        
-                                        <div className="space-y-3">
-                                            {/* Action 1: Send Nudge */}
-                                            <div>
-                                                <button
-                                                    onClick={() => setShowNudgeDraft(o => !o)}
-                                                    className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-xs font-bold text-slate-700"
-                                                >
-                                                    <span className="flex items-center gap-2">
-                                                        <Mail className="w-4 h-4 text-[#7c3aed]" />
-                                                        Generate AI Engagement Nudge
-                                                    </span>
-                                                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showNudgeDraft ? "rotate-180" : ""}`} />
-                                                </button>
-                                                
-                                                <AnimatePresence>
-                                                    {showNudgeDraft && (
-                                                        <motion.div
-                                                            initial={{ opacity: 0, height: 0 }}
-                                                            animate={{ opacity: 1, height: "auto" }}
-                                                            exit={{ opacity: 0, height: 0 }}
-                                                            className="overflow-hidden mt-2"
-                                                        >
-                                                            <div className="p-4 rounded-xl border border-dashed border-[#7c3aed]/30 bg-[#7c3aed]/5 space-y-3">
-                                                                <div className="text-[10px] uppercase font-bold text-[#7c3aed] tracking-wider">Draft Template:</div>
-                                                                <textarea
-                                                                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-700 outline-none focus:border-[#7c3aed]"
-                                                                    rows={4}
-                                                                    value={nudgeText}
-                                                                    onChange={(e) => setNudgeText(e.target.value)}
-                                                                />
+                                                        const handleTriggerEmail = async () => {
+                                                            if (!hrEmail) {
+                                                                toast.error("Please enter a valid HR Email.");
+                                                                return;
+                                                            }
+                                                            setSendingEmails(prev => ({ ...prev, [contactKey]: true }));
+                                                            try {
+                                                                await sendHrEmail(selectedId!, {
+                                                                    hrEmail,
+                                                                    hrName,
+                                                                    candidateName: candidateItem?.candidate?.name || "Candidate"
+                                                                });
+                                                                toast.success(`Verification email sent to HR contact at ${emp.companyName}!`);
+                                                                
+                                                                // Proactively re-fetch trust explanation to update timeline immediately!
+                                                                const res = await API.getTrustExplain(selectedId!);
+                                                                setDetails(res.data);
+                                                            } catch (err: any) {
+                                                                console.error(err);
+                                                                toast.error(err?.response?.data?.error || err?.response?.data?.message || "Failed to trigger email request.");
+                                                            } finally {
+                                                                setSendingEmails(prev => ({ ...prev, [contactKey]: false }));
+                                                            }
+                                                        };
+
+                                                        return (
+                                                            <div
+                                                                key={empIdx}
+                                                                className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-3"
+                                                            >
+                                                                <div className="flex justify-between items-start">
+                                                                    <div>
+                                                                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Company</span>
+                                                                        <div className="text-xs font-bold text-slate-800">{emp.companyName}</div>
+                                                                    </div>
+                                                                    <div className="text-right">
+                                                                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Dates</span>
+                                                                        <div className="text-[11px] text-slate-500 font-semibold">
+                                                                            {emp.employmentStartDate} - {emp.employmentEndDate || "Present"}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    <div>
+                                                                        <label className="text-[10px] font-bold text-slate-500">HR Name</label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={hrName}
+                                                                            onChange={(e) => {
+                                                                                setEditedHrContacts(prev => ({
+                                                                                    ...prev,
+                                                                                    [contactKey]: {
+                                                                                        name: e.target.value,
+                                                                                        email: hrEmail
+                                                                                    }
+                                                                                }));
+                                                                            }}
+                                                                            className="w-full mt-1 p-1.5 text-xs border border-slate-200 rounded-lg focus:border-[#00b8d4] outline-none font-medium"
+                                                                        />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="text-[10px] font-bold text-slate-500">HR Email</label>
+                                                                        <input
+                                                                            type="email"
+                                                                            value={hrEmail}
+                                                                            onChange={(e) => {
+                                                                                setEditedHrContacts(prev => ({
+                                                                                    ...prev,
+                                                                                    [contactKey]: {
+                                                                                        name: hrName,
+                                                                                        email: e.target.value
+                                                                                    }
+                                                                                }));
+                                                                            }}
+                                                                            className="w-full mt-1 p-1.5 text-xs border border-slate-200 rounded-lg focus:border-[#00b8d4] outline-none font-medium"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+
                                                                 <button
-                                                                    onClick={handleSendNudge}
-                                                                    disabled={sendingNudge}
-                                                                    className="px-4 py-2 bg-[#7c3aed] text-white rounded-lg text-xs font-bold transition hover:opacity-90 flex items-center gap-1.5"
+                                                                    onClick={handleTriggerEmail}
+                                                                    disabled={isSending}
+                                                                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold text-white transition-all disabled:opacity-65"
+                                                                    style={{ background: "linear-gradient(135deg, #00b8d4, #1565c0)" }}
                                                                 >
-                                                                    {sendingNudge ? (
+                                                                    {isSending ? (
                                                                         <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                                                                     ) : (
                                                                         <Send className="w-3 h-3" />
                                                                     )}
-                                                                    Send Nudge Email
+                                                                    Send Reference Request Email
                                                                 </button>
                                                             </div>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                            </div>
-
-                                            {/* Action 2: Schedule Priority Call */}
-                                            <button
-                                                onClick={handleCalendarSync}
-                                                className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-xs font-bold text-slate-700"
-                                            >
-                                                <span className="flex items-center gap-2">
-                                                    <Calendar className="w-4 h-4 text-emerald-500" />
-                                                    Schedule Priority Call Check-in
-                                                </span>
-                                                <ArrowUpRight className="w-4 h-4 text-slate-400" />
-                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                </>
+
+                                        {/* Metrics Grid */}
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {[
+                                                { label: "Total Opens", value: details.components?.interaction?.openCountTotal ?? 0, icon: <Eye className="w-4 h-4" />, color: "#00b8d4" },
+                                                { label: "Total Clicks", value: details.components?.interaction?.clickCountTotal ?? 0, icon: <MousePointer className="w-4 h-4" />, color: "#1565c0" },
+                                                {
+                                                    label: "Ghosting",
+                                                    value: details.components?.interaction?.ghostingDetected ? "Alert" : "Clean",
+                                                    icon: <ShieldCheck className="w-4 h-4" />,
+                                                    color: details.components?.interaction?.ghostingDetected ? "#ef4444" : "#10b981",
+                                                },
+                                            ].map(m => (
+                                                <div
+                                                    key={m.label}
+                                                    className="rounded-xl p-4 text-center"
+                                                    style={{
+                                                        background: "rgba(10, 31, 61, 0.02)",
+                                                        border: "1px solid #e2eaf3",
+                                                    }}
+                                                >
+                                                    <span style={{ color: m.color }} className="flex justify-center mb-2">{m.icon}</span>
+                                                    <div className="text-base font-black text-[#0a1f3d]">{m.value}</div>
+                                                    <div className="text-[10px] text-slate-500 font-medium mt-0.5">{m.label}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Interactive Trust Timeline */}
+                                        <div>
+                                            <h3 className="text-xs font-black uppercase tracking-[0.1em] text-slate-700 mb-3 flex items-center gap-2">
+                                                <Clock className="w-3.5 h-3.5 text-[#00b8d4]" />
+                                                Interactive Trust Timeline
+                                            </h3>
+                                            {!details.timeline || details.timeline.length === 0 ? (
+                                                <p className="text-slate-500 text-xs italic">No timeline events recorded.</p>
+                                            ) : (
+                                                <div className="relative border-l border-slate-200 pl-4 ml-2.5 space-y-4">
+                                                    {details.timeline.map((event, eventIdx) => {
+                                                        let icon = <ShieldCheck className="w-3 h-3 text-[#00b8d4]" />;
+                                                        let dotBg = "rgba(0,184,212,0.15)";
+                                                        let dotBorder = "rgba(0,184,212,0.25)";
+                                                        if (event.type === "ghosting") {
+                                                            icon = <AlertTriangle className="w-3 h-3 text-red-500" />;
+                                                            dotBg = "rgba(239,68,68,0.15)";
+                                                            dotBorder = "rgba(239,68,68,0.25)";
+                                                        } else if (event.type === "feedback") {
+                                                            icon = <Check className="w-3 h-3 text-emerald-500" />;
+                                                            dotBg = "rgba(16,185,129,0.15)";
+                                                            dotBorder = "rgba(16,185,129,0.25)";
+                                                        } else if (event.type === "email_sent") {
+                                                            icon = <Mail className="w-3 h-3 text-amber-500" />;
+                                                            dotBg = "rgba(245,158,11,0.15)";
+                                                            dotBorder = "rgba(245,158,11,0.25)";
+                                                        }
+
+                                                        return (
+                                                            <div key={eventIdx} className="relative group">
+                                                                <div
+                                                                    className="absolute -left-[27px] top-1 w-5.5 h-5.5 rounded-full flex items-center justify-center border transition-all duration-200"
+                                                                    style={{ background: dotBg, borderColor: dotBorder }}
+                                                                >
+                                                                    {icon}
+                                                                </div>
+                                                                <div>
+                                                                    <div className="text-xs font-bold text-slate-800 flex justify-between items-center">
+                                                                        <span>{event.title}</span>
+                                                                        <span className="text-[10px] text-slate-400 font-medium normal-case">
+                                                                            {new Date(event.timestamp).toLocaleString("en-IN", {
+                                                                                day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
+                                                                            })}
+                                                                        </span>
+                                                                    </div>
+                                                                    <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                                                                        {event.description}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Key Insights */}
+                                        {details.explanation && details.explanation.length > 0 && (
+                                            <div>
+                                                <h3 className="text-xs font-black uppercase tracking-[0.1em] text-slate-700 mb-3 flex items-center gap-2">
+                                                    <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                                                    Key Insights & Signals
+                                                </h3>
+                                                <ul className="space-y-2">
+                                                    {details.explanation.map((line, index) => (
+                                                        <li
+                                                            key={index}
+                                                            className="flex items-start gap-3 text-xs text-slate-600 leading-relaxed p-3 rounded-xl"
+                                                            style={{
+                                                                background: "rgba(10, 31, 61, 0.01)",
+                                                                border: "1px solid #e2eaf3",
+                                                            }}
+                                                        >
+                                                            <div
+                                                                className="w-4 h-4 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                                                                style={{ background: "rgba(0,184,212,0.15)" }}
+                                                            >
+                                                                <Check className="w-2.5 h-2.5 text-[#00b8d4]" />
+                                                            </div>
+                                                            <span>{line}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {/* AI Action Center */}
+                                        <div
+                                            className="rounded-2xl p-5 mt-4"
+                                            style={{
+                                                background: "rgba(124, 58, 237, 0.04)",
+                                                border: "1px solid rgba(124, 58, 237, 0.15)",
+                                            }}
+                                        >
+                                            <h3 className="text-xs font-black uppercase tracking-[0.1em] text-[#7c3aed] mb-3 flex items-center gap-2">
+                                                <Zap className="w-3.5 h-3.5 text-[#7c3aed]" />
+                                                AI Action Center
+                                            </h3>
+                                            <p className="text-[11px] text-slate-500 font-medium mb-4">
+                                                Predictive AI recommendations to mitigate candidate drop-off & ghosting.
+                                            </p>
+                                            
+                                            <div className="space-y-3">
+                                                {/* Action 1: Send Nudge */}
+                                                <div>
+                                                    <button
+                                                        onClick={() => setShowNudgeDraft(o => !o)}
+                                                        className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-xs font-bold text-slate-700"
+                                                    >
+                                                        <span className="flex items-center gap-2">
+                                                            <Mail className="w-4 h-4 text-[#7c3aed]" />
+                                                            Generate AI Engagement Nudge
+                                                        </span>
+                                                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showNudgeDraft ? "rotate-180" : ""}`} />
+                                                    </button>
+                                                    
+                                                    <AnimatePresence>
+                                                        {showNudgeDraft && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, height: 0 }}
+                                                                animate={{ opacity: 1, height: "auto" }}
+                                                                exit={{ opacity: 0, height: 0 }}
+                                                                className="overflow-hidden mt-2"
+                                                            >
+                                                                <div className="p-4 rounded-xl border border-dashed border-[#7c3aed]/30 bg-[#7c3aed]/5 space-y-3">
+                                                                    <div className="text-[10px] uppercase font-bold text-[#7c3aed] tracking-wider">Draft Template:</div>
+                                                                    <textarea
+                                                                        className="w-full p-2.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-700 outline-none focus:border-[#7c3aed]"
+                                                                        rows={4}
+                                                                        value={nudgeText}
+                                                                        onChange={(e) => setNudgeText(e.target.value)}
+                                                                    />
+                                                                    <button
+                                                                        onClick={handleSendNudge}
+                                                                        disabled={sendingNudge}
+                                                                        className="px-4 py-2 bg-[#7c3aed] text-white rounded-lg text-xs font-bold transition hover:opacity-90 flex items-center gap-1.5"
+                                                                    >
+                                                                        {sendingNudge ? (
+                                                                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                                        ) : (
+                                                                            <Send className="w-3 h-3" />
+                                                                        )}
+                                                                        Send Nudge Email
+                                                                    </button>
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+
+                                                {/* Action 2: Schedule Priority Call */}
+                                                <button
+                                                    onClick={handleCalendarSync}
+                                                    className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-xs font-bold text-slate-700"
+                                                >
+                                                    <span className="flex items-center gap-2">
+                                                        <Calendar className="w-4 h-4 text-emerald-500" />
+                                                        Schedule Priority Call Check-in
+                                                    </span>
+                                                    <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </>
+                                );
+                            })()
                             ) : null}
                         </div>
                     </div>

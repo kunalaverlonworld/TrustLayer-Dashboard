@@ -5,6 +5,7 @@ import { TrustMetrics } from "../models/TrustMetrics";
 import { calculateInteractionMetrics } from "../utils/calculateInteractionMetrics";
 import { calculateFinalTrustScore } from "../utils/calculateTrustMetrics";
 import { HrFeedback } from "../models/HrFeedback";
+import { webhookService } from "../services/webhookService";
 
 const router = Router();
 
@@ -277,6 +278,8 @@ router.get("/:applicationId", async (req: Request, res: Response) => {
         const metrics =
             calculateInteractionMetrics(tracking);
 
+        const existing = await TrustMetrics.findOne({ applicationId, companyName });
+
         const trust =
             await TrustMetrics.findOneAndUpdate(
                 {
@@ -308,6 +311,17 @@ router.get("/:applicationId", async (req: Request, res: Response) => {
                 },
                 { upsert: true, new: true }
             );
+
+        if (trust) {
+            // Trigger alerts on status changes
+            if (trust.isGhosting && (!existing || !existing.isGhosting)) {
+                await webhookService.sendNotification(`⚠️ *Candidate Ghosting Alert*`, [
+                    { title: "Candidate Name", value: trust.candidateName || "Unknown" },
+                    { title: "Job Title", value: trust.jobTitle || "N/A" },
+                    { title: "Details", value: "Candidate has gone silent (no open/click events in 48 hours)." }
+                ]);
+            }
+        }
 
         return res.json({
             ...trust.toObject(),

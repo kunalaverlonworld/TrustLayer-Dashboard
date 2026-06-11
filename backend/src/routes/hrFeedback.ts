@@ -4,6 +4,7 @@ import { sendHrFeedbackEmail } from "../services/emailService";
 import { Router, Request, Response } from "express";
 import { HrFeedback } from "../models/HrFeedback";
 import { TrustMetrics } from "../models/TrustMetrics"; // ✅ IMPORT ADDED
+import { webhookService } from "../services/webhookService";
 
 const router = Router();
 
@@ -67,6 +68,14 @@ router.post(
                     updatedAt: new Date(),
                 }
             );
+
+            // Send Slack Notification
+            await webhookService.sendNotification(`✅ *Reference Check Received*`, [
+                { title: "Candidate Name", value: trustMetric.candidateName || "Unknown" },
+                { title: "Job Title", value: trustMetric.jobTitle || "N/A" },
+                { title: "HR Trust Score", value: `${calculatedHrScore}%` },
+                { title: "Employer Comments", value: comments || "No comments provided." }
+            ]).catch(err => console.error("Webhook error:", err));
 
             res.status(201).json({
                 message: "HR feedback submitted successfully",

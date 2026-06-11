@@ -46,6 +46,13 @@ export interface TrustLayerDashboardItem {
     };
 }
 
+export interface TimelineEvent {
+    title: string;
+    description: string;
+    timestamp: string | Date;
+    type: "sent" | "open" | "click" | "email_sent" | "ghosting" | "feedback";
+}
+
 // --------------------------------------------
 // Trust Explain Response (Matches Backend)
 // --------------------------------------------
@@ -54,6 +61,7 @@ export interface TrustExplainResponse {
     totalInteractions: number;
     finalTrustScore: number;
     riskLevel: "Low" | "Moderate" | "High";
+    timeline?: TimelineEvent[];
 
     components: {
         interaction?: {
