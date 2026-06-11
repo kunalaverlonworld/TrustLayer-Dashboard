@@ -121,7 +121,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
 
     const initials       = getInitials(user?.name);
     const avatarGradient = getAvatarGradient(user?.name);
-    const plan           = localStorage.getItem("plan") || "";
+    const plan           = sessionStorage.getItem("plan") || "";
 
     const now = new Date();
     const timeString = now.toLocaleDateString("en-IN", {

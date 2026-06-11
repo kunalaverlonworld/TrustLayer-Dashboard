@@ -19,9 +19,9 @@ const SSOPage: React.FC = () => {
         }
 
         // Store dashboard JWT — same key AuthContext reads
-        localStorage.setItem("token",     token);
-        localStorage.setItem("plan",      plan);
-        localStorage.setItem("licenseId", licenseId);
+        sessionStorage.setItem("token",     token);
+        sessionStorage.setItem("plan",      plan);
+        sessionStorage.setItem("licenseId", licenseId);
 
         // Go to dashboard
         navigate("/dashboard", { replace: true });

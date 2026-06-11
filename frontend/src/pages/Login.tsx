@@ -23,9 +23,9 @@ const LoginPage: React.FC = () => {
             const { token, planName } = res.data;
 
             // Store token
-            localStorage.setItem("token", token);
+            sessionStorage.setItem("token", token);
             if (planName) {
-                localStorage.setItem("plan", planName);
+                sessionStorage.setItem("plan", planName);
             }
 
             // Refresh global auth state

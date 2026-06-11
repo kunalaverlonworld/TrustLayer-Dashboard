@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const fetchUser = async () => {
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             if (!token) {
                 setUser(null);
                 setLoading(false);
@@ -46,13 +46,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             const planName = response.data?.planName;
 
             if (planName) {
-                localStorage.setItem("plan", planName);
+                sessionStorage.setItem("plan", planName);
             }
 
             if (!userData || !userData._id) {
                 // Token valid but no user found — clear session
                 console.warn("[AuthContext] Token valid but user not found in response");
-                localStorage.removeItem("token");
+                sessionStorage.removeItem("token");
                 setUser(null);
             } else {
                 setUser(userData as User);
@@ -64,10 +64,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 setUser(null);
             } else {
                 // 401/403 — token invalid, clear session
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                localStorage.removeItem("plan");
-                localStorage.removeItem("licenseId");
+                sessionStorage.removeItem("token");
+                sessionStorage.removeItem("user");
+                sessionStorage.removeItem("plan");
+                sessionStorage.removeItem("licenseId");
                 setUser(null);
             }
         } finally {
@@ -76,10 +76,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        localStorage.removeItem("plan");
-        localStorage.removeItem("licenseId");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
+        sessionStorage.removeItem("plan");
+        sessionStorage.removeItem("licenseId");
         setUser(null);
         // Redirect to landing page and signal it to clear its own session
         const landingUrl = import.meta.env.VITE_LANDING_URL || "https://trustlayer-by3p.onrender.com";

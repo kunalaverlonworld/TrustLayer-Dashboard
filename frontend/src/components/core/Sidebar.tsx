@@ -44,15 +44,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     ];
 
     const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("plan");
-        localStorage.removeItem("licenseId");
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("plan");
+        sessionStorage.removeItem("licenseId");
+        sessionStorage.removeItem("user");
         const landingUrl = import.meta.env.VITE_LANDING_URL || "https://trustlayer-by3p.onrender.com";
         window.location.href = `${landingUrl}?loggedOut=1`;
     };
 
-    const planLabel = (localStorage.getItem("plan") || "Basic").toUpperCase();
+    const planLabel = (sessionStorage.getItem("plan") || "Basic").toUpperCase();
     const planColor =
         planLabel === "ENTERPRISE"
             ? "from-amber-500/10 to-orange-600/10 border border-amber-500/20 text-amber-800"

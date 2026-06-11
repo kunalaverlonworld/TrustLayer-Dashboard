@@ -13,7 +13,7 @@ export const apiClient = axios.create({
 // -----------------------------
 apiClient.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -41,10 +41,10 @@ apiClient.interceptors.response.use(
 
         if (status === 401) {
             // Token expired or invalid — clear session and redirect
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            localStorage.removeItem("plan");
-            localStorage.removeItem("licenseId");
+            sessionStorage.removeItem("token");
+            sessionStorage.removeItem("user");
+            sessionStorage.removeItem("plan");
+            sessionStorage.removeItem("licenseId");
 
             if (window.location.pathname !== "/login") {
                 window.location.href = "/login";

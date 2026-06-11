@@ -10,7 +10,7 @@ const PlanProtectedRoute: React.FC<PlanProtectedRouteProps> = ({
     allowedPlans,
     fallbackPath = "/dashboard",
 }) => {
-    const plan = localStorage.getItem("plan")?.toLowerCase() ?? "basic";
+    const plan = sessionStorage.getItem("plan")?.toLowerCase() ?? "basic";
 
     if (!allowedPlans.includes(plan)) {
         return <Navigate to={fallbackPath} replace />;
