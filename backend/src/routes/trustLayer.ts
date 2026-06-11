@@ -6,6 +6,8 @@ import { calculateInteractionMetrics } from "../utils/calculateInteractionMetric
 import { calculateFinalTrustScore } from "../utils/calculateTrustMetrics";
 import { HrFeedback } from "../models/HrFeedback";
 import { webhookService } from "../services/webhookService";
+import { authenticate, AuthRequest } from "../middlewares/auth";
+import { Company } from "../models/Company";
 
 const router = Router();
 
@@ -16,10 +18,14 @@ GET /trustlayer/all
 Dashboard-ready aggregated view
 Multi-tenant safe (applicationId + companyName)
 */
-router.get("/all", async (req: Request, res: Response) => {
+router.get("/all", authenticate, async (req: AuthRequest, res: Response) => {
     const recruitmentApiBaseUrl = process.env.RECRUITMENT_API_URL;
+    const userCompanyId = req.user?.companyId;
 
     try {
+        const company = await Company.findById(userCompanyId);
+        const userCompanyName = company?.name ?? "Unknown";
+
         // Try to fetch from recruitment API first
         let rawData: any[] = [];
         const fromExternalApi = recruitmentApiBaseUrl ? true : false;
@@ -36,9 +42,15 @@ router.get("/all", async (req: Request, res: Response) => {
                     }
                 );
 
-                rawData = Array.isArray(apiRes.data)
+                const allRaw = Array.isArray(apiRes.data)
                     ? apiRes.data
                     : [apiRes.data];
+
+                // Filter by companyName (case-insensitive trim match)
+                rawData = allRaw.filter((item: any) => {
+                    const itemCompanyName = item.candidate?.companyName ?? "";
+                    return itemCompanyName.trim().toLowerCase() === userCompanyName.trim().toLowerCase();
+                });
             } catch (apiError: any) {
                 console.warn(
                     "⚠️ Recruitment API unavailable:",
@@ -61,7 +73,7 @@ router.get("/all", async (req: Request, res: Response) => {
                 });
                 return;
             }
-            const metrics = await TrustMetrics.find({}).limit(100);
+            const metrics = await TrustMetrics.find({ companyId: userCompanyId }).limit(100);
 
 
             results = metrics.map((m: any) => {
@@ -154,7 +166,7 @@ router.get("/all", async (req: Request, res: Response) => {
                                 companyName,
                             },
                             {
-                                companyId: process.env.SYSTEM_COMPANY_ID,
+                                companyId: userCompanyId,
                                 applicationId,
                                 companyName,
                                 openCount: record.totalOpens,
@@ -250,9 +262,10 @@ GET /trustlayer/:applicationId
 Manual single-app refresh
 Multi-tenant safe
 */
-router.get("/:applicationId", async (req: Request, res: Response) => {
+router.get("/:applicationId", authenticate, async (req: AuthRequest, res: Response) => {
     const { applicationId } = req.params;
     const recruitmentApiBaseUrl = process.env.RECRUITMENT_API_URL;
+    const userCompanyId = req.user?.companyId;
 
     if (!recruitmentApiBaseUrl) {
         return res.status(500).json({
@@ -287,6 +300,7 @@ router.get("/:applicationId", async (req: Request, res: Response) => {
                     companyName,
                 },
                 {
+                    companyId: userCompanyId,
                     applicationId,
                     companyName,
                     openCount:

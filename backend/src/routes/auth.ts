@@ -32,8 +32,13 @@ router.post("/login", async (req, res) => {
 
     const company = await Company.findById(user.companyId);
     const planName = company?.subscriptionPlan ?? "basic";
+    const companyName = company?.name ?? "";
 
-    return res.json({ token, planName });
+    const userObj = user.toObject() as any;
+    userObj.companyName = companyName;
+    delete userObj.passwordHash; // never expose the password hash
+
+    return res.json({ token, planName, user: userObj });
   } catch (error) {
     return res.status(500).json({ message: "Login failed", error });
   }
@@ -54,8 +59,12 @@ router.get("/me", async (req, res) => {
 
     const company = await Company.findById(user.companyId);
     const planName = company?.subscriptionPlan ?? "basic";
+    const companyName = company?.name ?? "";
 
-    return res.json({ user, planName });
+    const userObj = user.toObject() as any;
+    userObj.companyName = companyName;
+
+    return res.json({ user: userObj, planName });
   } catch {
     return res.status(401).json({ message: "Invalid or expired token" });
   }
@@ -75,7 +84,7 @@ const mapPlanName = (name: string): "basic" | "starter" | "pro" | "enterprise" =
 
 router.post("/sso", async (req, res) => {
   try {
-    const { email, name, planName, licenseId } = req.body;
+    const { email, name, planName, licenseId, companyName } = req.body;
 
     if (!email) {
       return res.status(400).json({ message: "email is required" });
@@ -87,12 +96,22 @@ router.post("/sso", async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      // Auto-create user from LMS — get or create default company
-      let company = await Company.findOne({ companyCode: "DEFAULT" });
+      // Auto-create user from LMS — get or create company
+      const finalCompanyName = companyName || "Default Company";
+      let company = await Company.findOne({ name: finalCompanyName });
       if (!company) {
+        let codeBase = finalCompanyName.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase();
+        if (!codeBase) codeBase = "COMP";
+        let uniqueCode = codeBase;
+        let counter = 1;
+        while (await Company.findOne({ companyCode: uniqueCode })) {
+          uniqueCode = `${codeBase}_${counter}`;
+          counter++;
+        }
+
         company = await Company.create({
-          name: "Default Company",
-          companyCode: "DEFAULT",
+          name: finalCompanyName,
+          companyCode: uniqueCode,
           subscriptionPlan: targetPlan,
         });
       }

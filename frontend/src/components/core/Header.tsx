@@ -513,6 +513,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
                         <div style={{ padding: "24px" }}>
                             {[
                                 { label: "Full Name",    value: user?.name || "—" },
+                                { label: "Company",      value: user?.companyName || "—" },
                                 { label: "Role",         value: user?.role || "—" },
                                 { label: "Current Plan", value: plan || "No active plan" },
                                 { label: "Account ID",   value: user?._id ? `#${user._id.slice(-8).toUpperCase()}` : "—" },

@@ -5,6 +5,7 @@ import {
     TrustLayerDashboardItem,
     TrustExplainResponse,
 } from "../../types/types";
+import { useAuth } from "../auth/AuthContext";
 import DashboardInsights from "./DashboardInsights";
 import SummaryCards from "./SummaryCards";
 import { motion, AnimatePresence } from "framer-motion";
@@ -58,6 +59,7 @@ function CandidateAvatar({ name }: { name: string }) {
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [data, setData] = useState<TrustLayerDashboardItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -344,7 +346,7 @@ const Dashboard: React.FC = () => {
                         </div>
                     </div>
                     <h1 className="text-2xl font-black text-slate-800 tracking-tight">
-                        AI Trust Dashboard
+                        {user?.companyName ? `${user.companyName} Trust Dashboard` : "AI Trust Dashboard"}
                     </h1>
                     <p className="text-slate-500 text-sm mt-1 font-medium">
                         Monitor aggregated company health, risk distributions, and real-time reliability signals.
